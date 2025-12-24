@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 redis_client = settings.REDIS_CLIENT
 
 otp_expiry = 300
-max_resends_per_hour = 5
+max_resends_per_hour = 10
 temp_user_expiry = 300
 
 
@@ -81,7 +81,7 @@ def veriy_signup_otp(email,code):
 ####################### OTP for Reset Password #############
 RESET_OTP_EXPIRY = 300
 RESET_TOKEN_EXPIRY = 600 #10 minutes for setting password after otp verification
-MAX_RESET_ATTEMPTS_PER_HOUR = 1
+MAX_RESET_ATTEMPTS_PER_HOUR = 5
 
 def send_reset_otp(email):
     
@@ -140,7 +140,7 @@ def clear_reset_data(email):
     
     
 #######################################################################
-##################### RESEND OTP fro reset Password ####################
+##################### RESEND OTP for reset Password ####################
 RESET_RESEND_COOLDOWN = 30
 MAX_RESENDS_PER_HOUR = 10
 

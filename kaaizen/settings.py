@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'core',
     'users',
     'auth_api',
+    'clients',
+    'admin_api',
 ]
 
 MIDDLEWARE = [

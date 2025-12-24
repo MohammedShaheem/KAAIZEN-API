@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from .utils.google import verify_google_token
+from.utils.jwt_authentication import CookieJWTAuthentication
  
 User = get_user_model()
 
@@ -42,7 +43,7 @@ def set_jwt_cookies(response,refresh:RefreshToken, access_max_age:int=60*15, ref
         httponly=True,
         secure=False,
         samesite='Lax',
-        path="/api/auth/"
+        path="/"
     )
     return response
 
@@ -94,13 +95,23 @@ class RefreshView(APIView):
 
 
 class MeView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
     def get(self,request):
-        access_token = request.COOKIES.get("access")
-        user = request.user if request.user and request.user.is_authenticated else None
-        if user:
-            return Response({"user":{"email":user.email, "role":user.role}}, status=status.HTTP_200_OK)
-        return Response({"detail":"Unauthenticated"},status=status.HTTP_401_UNAUTHORIZED)
-
+        print("lkjmhn",request.user)
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {"detail" : "Unauthenticated"},
+                status = status.HTTP_401_UNAUTHORIZED
+            )
+        return Response(
+            {
+                "user":{
+                    "email":request.user.email,
+                    "role":request.user.role
+                }
+            },
+            status = status.HTTP_200_OK
+        )
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class GetCsrfToken(APIView):
@@ -215,11 +226,6 @@ class LoginView(APIView):
                 {"detail":"Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        # if not user.is_active:
-        #     return Response(
-        #         {"detail":"Account not verified"},
-        #         status = status.HTTP_403_FORBIDDEN
-        #     )
         
         refresh = RefreshToken.for_user(user)
         
@@ -401,7 +407,7 @@ class GoogleAuthView(APIView):
                     google_id=google_id,
                 )
         
-                user.set_unusable__password()
+                user.set_unusable_password()
                 user.save()
         
         refresh = RefreshToken.for_user(user)
