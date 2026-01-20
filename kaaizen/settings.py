@@ -50,6 +50,9 @@ INSTALLED_APPS = [
     'auth_api',
     'clients',
     'admin_api',
+    'nutrition',
+    'workouts',
+    'trainers'
 ]
 
 MIDDLEWARE = [
@@ -111,8 +114,11 @@ CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+        'auth_api.utils.jwt_authentication.CookieJWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
 }
 
 
@@ -180,3 +186,68 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 #GOOGGLE AUTH
 GOOGLE_CLIENT_ID = "894057529356-qrjrk44locrntnhtusvvavg6n0mrtup1.apps.googleusercontent.com"
+
+
+
+# EDAMAM
+EDAMAM_APP_ID = config('EDAMAM_APP_ID')
+EDAMAM_APP_KEY = config('EDMAM_APP_KEY')
+
+
+
+
+# Cloudinary
+import cloudinary
+
+CLOUDINARY_CLOUD_NAME = config("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = config("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = config("CLOUDINARY_API_SECRET")
+
+cloudinary.config(
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
+    secure=True,
+)
+
+
+# Logger
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "simple": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "django.log",
+            "formatter": "verbose",
+        },
+    },
+
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "": {  # Root logger
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+        },
+    },
+}
