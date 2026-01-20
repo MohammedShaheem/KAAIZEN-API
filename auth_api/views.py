@@ -17,6 +17,11 @@ from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from .utils.google import verify_google_token
 from.utils.jwt_authentication import CookieJWTAuthentication
+from clients.models import ClientProfile
+from rest_framework.permissions import AllowAny
+from .services.signup import signup_with_role
+from trainers.models import TrainerProfile
+
  
 User = get_user_model()
 
@@ -67,6 +72,9 @@ class RefreshView(APIView):
         
         try:
             refresh_obj = RefreshToken(refresh_token)
+            if settings.REDIS_CLIENT.exists(f"blacklist:{refresh_obj.get('jti')}"):
+                return Response({"detail":"Token revoked"},status=401)
+                
             
             new_access_token = str(refresh_obj.access_token)
             
@@ -97,7 +105,7 @@ class RefreshView(APIView):
 class MeView(APIView):
     authentication_classes = [CookieJWTAuthentication]
     def get(self,request):
-        print("lkjmhn",request.user)
+        
         if not request.user or not request.user.is_authenticated:
             return Response(
                 {"detail" : "Unauthenticated"},
@@ -124,47 +132,51 @@ class GetCsrfToken(APIView):
 
 #################################################################################
     
-class signupview(APIView):
+
+class TrainerSignupView(APIView):
+    
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
-        if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
+        serializer.is_valid(raise_exception=True)
 
-        email = data["email"]
-        password = data["password"]
-        role = data["role"]
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
 
-        user = User.objects.filter(email=email).first()
-
-        if user:
-            if user.is_active:
-                return Response(
-                    {"detail": "User already registered"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                return Response(
-                    {"detail": "Blocked user"},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-
-        store_temp_signup_data(email, password, role)
-        send_singup_otp(email)
-
-        return Response(
-            {"detail": "OTP sent to your email"},
-            status=status.HTTP_200_OK
+        return signup_with_role(
+            email=email,
+            password=password,
+            role="trainer"
         )
+
+#################################################################################################################
+
+
+class ClientSignupView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = SignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
+
+        return signup_with_role(
+            email=email,
+            password=password,
+            role="client"
+        )
+
+##################################################################################################################
 
 
 class VerifySignupView(APIView):
     def post(self,request):
         serializer = VerifyOTPSerializer(data=request.data)
         if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
+            
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         # serializer.is_valid(raise_exception=True)
         
@@ -212,7 +224,7 @@ class LoginView(APIView):
     def post(self,request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
+            
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         # serializer.is_valid(raise_exception=True)
         
@@ -226,13 +238,23 @@ class LoginView(APIView):
                 {"detail":"Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+            
+        if user.role == "client":
+            has_profile = ClientProfile.objects.filter(user=user).exists()
+        elif user.role == "trainer":
+            has_profile = TrainerProfile.objects.filter(user=user).exists()
+        else:
+            has_profile = False
+
+        
         
         refresh = RefreshToken.for_user(user)
         
         resp = Response({
             "user":{
                 "email":user.email,
-                "role":user.role
+                "role":user.role,
+                "has_profile":has_profile,
             }
         },
         status = status.HTTP_200_OK
@@ -256,14 +278,15 @@ class LogoutView(APIView):
             status=status.HTTP_205_RESET_CONTENT
         )
         response.delete_cookie("access",path="/")
-        response.delete_cookie("refresh",path="/api/auth")
+        response.delete_cookie("refresh",path="/")
         
+        return response
         
 class ForgotPasswordView(APIView):
     def post(self,request):
         serializer = ForgotPasswordSerializer(data = request.data)
         if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)  
+             
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         # serializer.is_valid(raise_exception=True)
          
@@ -294,7 +317,7 @@ class VerifyResetOTPView(APIView):
     def post(self,request):
         serializer = VerifyResetOTPSerializer(data=request.data)
         if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
+           
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         # serializer.is_valid(raise_exception=True)
         
@@ -307,7 +330,7 @@ class VerifyResetOTPView(APIView):
                 {"detail":"Invalid or expired OTP"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
+        
         return Response(
             {"detail":"OTP verified. Use the token to reset password.","reset_token": reset_token},
             status = status.HTTP_200_OK
@@ -315,10 +338,10 @@ class VerifyResetOTPView(APIView):
         
 class ResetPasswordView(APIView):
     def post(self, request):
-        print("REQUEST DATA:", request.data)
+        
         serializer = ResetPasswordSerializer(data=request.data)
         if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
+            
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # serializer.is_valid(raise_exception=True)
@@ -360,7 +383,7 @@ class ResendResetOTPView(APIView):
     def post(self,request):
         serializer = ResendResetOTPSerializer(data = request.data)
         if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
+            
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         # serializer.is_valid(raise_exception=True) 
         
@@ -380,6 +403,8 @@ class ResendResetOTPView(APIView):
         )
         
 class GoogleAuthView(APIView):
+    authentication_classes = [] 
+    permission_classes = [AllowAny]
     def post(self,request):
         token = request.data.get("id_token")
         if not token:
@@ -410,13 +435,16 @@ class GoogleAuthView(APIView):
                 user.set_unusable_password()
                 user.save()
         
+        has_profile = ClientProfile.objects.filter(user_id=user.id).exists()
+        
         refresh = RefreshToken.for_user(user)
         
         resp = Response(
             {
                 "user":{
                     "email":user.email,
-                    "role":user.role
+                    "role":user.role,
+                    "has_profile":has_profile,
                 }
             },
             status=status.HTTP_200_OK

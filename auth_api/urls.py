@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import signupview,VerifySignupView,LoginView,RefreshView,MeView,GetCsrfToken,LogoutView
+from .views import ClientSignupView,TrainerSignupView,VerifySignupView,LoginView,RefreshView,MeView,GetCsrfToken,LogoutView
 from .views import ForgotPasswordView,VerifyResetOTPView,ResetPasswordView,ResendResetOTPView,GoogleAuthView
 
 urlpatterns = [
-   path('signup/',signupview.as_view()),
+   path("client_signup/", ClientSignupView.as_view()),
+   path("trainer_signup/", TrainerSignupView.as_view()),
    path('verify-otp/',VerifySignupView.as_view()),
    path('login/',LoginView.as_view()),
    path('refresh/',RefreshView.as_view()),

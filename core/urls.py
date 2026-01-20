@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
+from .views import CloudinarySignatureView
 
 urlpatterns = [
-    path("",views.hello)
+    path("cloudinary/",CloudinarySignatureView.as_view())
 ]

@@ -8,7 +8,7 @@ user = get_user_model()
 class SignupSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-    role = serializers.CharField()
+    # role = serializers.CharField()
     
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -31,7 +31,7 @@ class VerifyResetOTPSerializer(serializers.Serializer):
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     reset_token = serializers.CharField(min_length=6, max_length=6)
-    new_password = serializers.CharField(min_length=8)
+    new_password = serializers.CharField(min_length=6)
     
 class ResendResetOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()

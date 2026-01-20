@@ -81,7 +81,7 @@ def veriy_signup_otp(email,code):
 ####################### OTP for Reset Password #############
 RESET_OTP_EXPIRY = 300
 RESET_TOKEN_EXPIRY = 600 #10 minutes for setting password after otp verification
-MAX_RESET_ATTEMPTS_PER_HOUR = 5
+MAX_RESET_ATTEMPTS_PER_HOUR = 10
 
 def send_reset_otp(email):
     
@@ -94,6 +94,7 @@ def send_reset_otp(email):
     
     otp = generate_otp()
     otp_key = f"reset_otp:{email}"
+    
     
     redis_client.setex(otp_key,RESET_OTP_EXPIRY,otp)
     
@@ -123,6 +124,7 @@ def verify_reset_otp(email,otp):
     redis_client.delete(otp_key)
     
     reset_token = str(random.randint(100000,999999)) #setting token for autherisation after otp authentication
+   
     reset_key = f"reset_token:{email}"
     redis_client.setex(reset_key,RESET_TOKEN_EXPIRY,reset_token)
     
@@ -131,6 +133,8 @@ def verify_reset_otp(email,otp):
 def verify_reset_token(email,token):
     reset_key = f"reset_token:{email}"
     stored_token = redis_client.get(reset_key)
+    
+    
     return stored_token == token
 
 def clear_reset_data(email):

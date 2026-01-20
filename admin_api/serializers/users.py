@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from users.models import User
 from clients.models import ClientProfile
+from trainers.models import TrainerProfile
 
 
 class AdminClientListSerilalizer(serializers.ModelSerializer):
@@ -29,7 +30,7 @@ class AdminClinetDetailSerialier(serializers.ModelSerializer):
             "weight_kg",
             "fitness_goal",
             "workout_experience",
-            "preferred_workout_types",
+            "preferred_workout_type",
             "goal_speed",
             "diet_preference",
             "daily_activity_level",
@@ -37,16 +38,6 @@ class AdminClinetDetailSerialier(serializers.ModelSerializer):
             "water_goal_ml",
         )
         read_only_fields = fields
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
 class AdminTrainerListSerilalizer(serializers.ModelSerializer):
     class Meta:
@@ -58,3 +49,22 @@ class AdminTrainerListSerilalizer(serializers.ModelSerializer):
             "is_verified",
             "created_at"
         )
+        
+class AdminTrainerDetailSerialier(serializers.ModelSerializer):
+    email = serializers.EmailField(source="user.email")
+    user_id = serializers.UUIDField(source="user.id")
+
+    class Meta:
+        model = TrainerProfile
+        fields = [
+            "id",
+            "user_id",
+            "email",
+            "full_name",
+            "gender",
+            "bio",
+            "skills",
+            "experience_certificate",
+            "is_verified",
+            "created_at",
+        ]

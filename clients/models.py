@@ -10,6 +10,7 @@ from .choices import (
     DietPreference,
     DailyActivityLevel,
 )
+from nutrition.models import MealEntry
 
 class ClientProfile(UUIDModel, TimeStampedModel):
     user = models.OneToOneField(
@@ -62,3 +63,33 @@ class ClientProfile(UUIDModel, TimeStampedModel):
     
     def __str__(self):
         return f"{self.user.email} - Client Profile"
+    
+# 6 times divided meal entries
+class MealAllocation(models.Model):
+    MEAL_TYPES = MealEntry.MEAL_TYPES  
+
+    profile = models.ForeignKey(
+        ClientProfile,
+        on_delete=models.CASCADE,
+        related_name='meal_allocations'
+    )
+    meal_type = models.CharField(
+        max_length=20,
+        choices=MEAL_TYPES,
+        
+    )
+    percentage = models.FloatField(
+        default=0.0,
+        
+    )
+    target_calories = models.FloatField(
+        default=0.0,
+        
+    )
+    class Meta:
+        unique_together = ['profile', 'meal_type']
+        indexes = [models.Index(fields=['profile', 'meal_type'])]
+        verbose_name_plural = "Meal Allocations"
+    
+    def __str__(self):
+        return f"{self.profile.user.email}'s {self.get_meal_type_display()}: {self.target_calories} kcal ({self.percentage}%)"
