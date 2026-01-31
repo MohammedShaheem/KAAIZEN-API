@@ -113,6 +113,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 REST_FRAMEWORK = {
+    
+    "EXCEPTION_HANDLER": "kaaizen.exceptions.custom_exception_handler",
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'auth_api.utils.jwt_authentication.CookieJWTAuthentication',
     ),

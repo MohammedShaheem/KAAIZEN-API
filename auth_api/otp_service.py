@@ -40,21 +40,39 @@ def send_singup_otp(email):
     resend_key = f"otp_resend:{email}"
     resend_count = redis_client.get(resend_key)
     
-   
     if resend_count and int(resend_count) >= max_resends_per_hour:
-        raise Exception("Too many OTP requests.Try again in 1 hour.")
+        raise Exception("Too many OTP requests. Try again in 1 hour.")
     
     otp = generate_otp()
     otp_key = f"otp:{email}"
     
-    redis_client.setex(otp_key,otp_expiry,otp)
+    redis_client.setex(otp_key, otp_expiry, otp)
     
     redis_client.incr(resend_key)
-    redis_client.expire(resend_key,3600)
+    redis_client.expire(resend_key, 3600)
     
+    email_body = f"""
+Hello,
+
+Welcome! We received a request to create an account using this email address.
+
+Please use the verification code below to complete your signup:
+
+Your One-Time Password (OTP):
+{otp}
+
+This code is valid for 5 minutes. For your security, please do not share this code with anyone.
+
+If you did not request this signup, you can safely ignore this email.
+
+Best regards,  
+Support Team  
+Your App Name
+"""
+
     send_mail(
         "Your Signup OTP",
-        f"Your OTP is {otp}. It expires in 5 minutes.",
+        email_body,
         settings.DEFAULT_FROM_EMAIL,
         [email]
     )

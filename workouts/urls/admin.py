@@ -1,10 +1,7 @@
 from django.urls import path
-from workouts.views.admin_workouts import (
-    AdminWorkoutCategoryListCreateView,
-    AdminWorkoutCategoryDetailView,
-    AdminWorkoutListCreateView,
-    AdminWorkoutDetailView,
-)
+from ..views.admin.admin_workouts import AdminWorkoutCategoryDetailView,AdminWorkoutCategoryListCreateView
+from ..views.admin.admin_workouts import AdminWorkoutListCreateView,AdminWorkoutDetailView
+
 
 urlpatterns = [
     path("categories/", AdminWorkoutCategoryListCreateView.as_view()),

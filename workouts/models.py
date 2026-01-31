@@ -18,12 +18,19 @@ class MuscleGroup(models.Model):
 class WorkoutCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
+    category_image_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+    )
+
     class Meta:
-        verbose_name = 'Workout Category'
-        ordering = ['name']
+        verbose_name = "Workout Category"
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
+
 
 # Representing single workout video
 class Workout(UUIDModel, TimeStampedModel):  

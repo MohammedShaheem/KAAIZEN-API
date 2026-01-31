@@ -18,17 +18,6 @@ class AdminWorkoutCategorySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Category with this name already exists.")
         return value
 
-
-
-
-
-
-
-
-
-
-
-
 class AdminWorkoutSerializer(serializers.ModelSerializer):
     muscle_groups = serializers.PrimaryKeyRelatedField(
         queryset=MuscleGroup.objects.all(),

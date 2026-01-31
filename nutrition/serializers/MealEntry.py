@@ -4,9 +4,19 @@ from django.utils import timezone
 from datetime import datetime
 import requests
 from django.conf import settings
+from decimal import Decimal, ROUND_HALF_UP
+
+
+
+def _round(self, value):
+    return float(
+        Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
+
 
 
 class MealEntrySerializer(serializers.ModelSerializer):
+    
     # Input fields 
     print("mealentryserializerentering here")
     food_description = serializers.CharField(required=True)
@@ -14,6 +24,12 @@ class MealEntrySerializer(serializers.ModelSerializer):
     date_eaten = serializers.DateField(required=True)
     time_eaten = serializers.TimeField(required=True)
 
+    
+    def _round(self, value):
+        return float(
+        Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
+        
     class Meta:
         model = MealEntry
         fields = [
@@ -53,25 +69,27 @@ class MealEntrySerializer(serializers.ModelSerializer):
         if total_nutrients and total_calories > 0:
             print("USING AGGREGATED TOTAL_NUTRIENTS")
             validated_data.update({
-                'total_calories': total_calories,
-                'protein_grams': self._extract_nutrient(total_nutrients, 'PROCNT'),
-                'carbs_grams': self._extract_nutrient(total_nutrients, 'CHOCDF'),
-                'fat_grams': self._extract_nutrient(total_nutrients, 'FAT'),
-                'fiber_grams': self._extract_nutrient(total_nutrients, 'FIBTG'),
+                'total_calories': self._round(total_calories),
+                'protein_grams': self._round(self._extract_nutrient(total_nutrients, 'PROCNT')),
+                'carbs_grams': self._round(self._extract_nutrient(total_nutrients, 'CHOCDF')),
+                'fat_grams': self._round(self._extract_nutrient(total_nutrients, 'FAT')),
+                'fiber_grams': self._round(self._extract_nutrient(total_nutrients, 'FIBTG')),
                 'source': 'edamam'  
             })
+
         else:
             
             print("FALLING BACK TO SUMMING PER-INGREDIENT NUTRIENTS")
             summed_nutrients = self._sum_per_ingredient_nutrients(nutrition_data)
             validated_data.update({
-                'total_calories': summed_nutrients.get('calories', 0.0),
-                'protein_grams': summed_nutrients.get('protein', 0.0),
-                'carbs_grams': summed_nutrients.get('carbs', 0.0),
-                'fat_grams': summed_nutrients.get('fat', 0.0),
-                'fiber_grams': summed_nutrients.get('fiber', 0.0),
+                'total_calories': self._round(summed_nutrients.get('calories', 0.0)),
+                'protein_grams': self._round(summed_nutrients.get('protein', 0.0)),
+                'carbs_grams': self._round(summed_nutrients.get('carbs', 0.0)),
+                'fat_grams': self._round(summed_nutrients.get('fat', 0.0)),
+                'fiber_grams': self._round(summed_nutrients.get('fiber', 0.0)),
                 'source': 'edamam'  
             })
+
             print("SUMMED VALUES - Calories:", validated_data['total_calories'], "Protein:", validated_data['protein_grams'])  
 
         
