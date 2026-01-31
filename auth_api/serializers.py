@@ -18,6 +18,8 @@ class VerifyOTPSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only = True)
+    login_as = serializers.ChoiceField(choices=["client", "trainer", "admin"])
+
     
 
 class ForgotPasswordSerializer(serializers.Serializer):

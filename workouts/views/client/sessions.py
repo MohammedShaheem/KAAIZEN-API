@@ -42,7 +42,8 @@ class CompleteWorkoutSessionView(APIView):
 
         videos, meta = aggregate_session(REDIS_CLIENT, key)
 
-        start_time = now().fromisoformat(meta["started_at"])
+        start_time = now().fromisoformat(meta["started_at"]) 
+        # how many time have been passed
         wall_clock = (now() - start_time).total_seconds()
 
         total_effective, calories = calculate_calories(

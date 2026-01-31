@@ -88,7 +88,7 @@ class RefreshView(APIView):
                 value=new_access_token,
                 httponly=True,
                 secure=False,
-                samesite="Lax",
+                samesite="Lax",   
                 max_age=60*15,
                 path="/"
             )
@@ -221,46 +221,54 @@ class VerifySignupView(APIView):
             
             
 class LoginView(APIView):
-    def post(self,request):
+    def post(self, request):
         serializer = LoginSerializer(data=request.data)
-        if not serializer.is_valid():
-            
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # serializer.is_valid(raise_exception=True)
-        
+        serializer.is_valid(raise_exception=True)
+
         email = serializer.validated_data["email"]
         password = serializer.validated_data["password"]
-        
-        user = authenticate(request,username=email,password=password)
-        
+        login_as = serializer.validated_data["login_as"]
+
+        user = authenticate(request, username=email, password=password)
+
         if user is None:
             return Response(
-                {"detail":"Invalid credentials"},
+                {"detail": "Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-            
+
+        if user.role != login_as:
+            return Response(
+                {
+                    "detail": f"You are registered as a {user.role}. "
+                              f"You cannot log in as a {login_as}."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Profile check
+        
         if user.role == "client":
             has_profile = ClientProfile.objects.filter(user=user).exists()
         elif user.role == "trainer":
             has_profile = TrainerProfile.objects.filter(user=user).exists()
+            print("from login view",has_profile)
         else:
             has_profile = False
 
-        
-        
         refresh = RefreshToken.for_user(user)
-        
+
         resp = Response({
-            "user":{
-                "email":user.email,
-                "role":user.role,
-                "has_profile":has_profile,
+            "user": {
+                "email": user.email,
+                "role": user.role,
+                "has_profile": has_profile,
             }
-        },
-        status = status.HTTP_200_OK
-        )
-        set_jwt_cookies(resp,refresh)
+        }, status=status.HTTP_200_OK)
+
+        set_jwt_cookies(resp, refresh)
         return resp
+
     
 
 class LogoutView(APIView):
@@ -435,7 +443,13 @@ class GoogleAuthView(APIView):
                 user.set_unusable_password()
                 user.save()
         
-        has_profile = ClientProfile.objects.filter(user_id=user.id).exists()
+        if user.role == "client":
+            has_profile = ClientProfile.objects.filter(user=user).exists()
+        elif user.role == "trainer":
+            has_profile = TrainerProfile.objects.filter(user=user).exists()
+            print("from login view",has_profile)
+        else:
+            has_profile = False
         
         refresh = RefreshToken.for_user(user)
         
