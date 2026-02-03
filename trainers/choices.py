@@ -16,3 +16,8 @@ class Skill(TextChoices):
     STRESS_MANAGEMENT = 'stress_management', 'Stress Management'
     FLEXIBILITY = 'flexibility', 'Flexibility'
     CORE_STRENGTHENING = 'core_strengthening', 'Core Strengthening'
+    
+class ShiftType(TextChoices):
+    MORNING = 'morning', 'Morning'
+    EVENING = 'evening', 'Evening'
+    BOTH = 'both', 'Both'

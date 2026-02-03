@@ -20,8 +20,6 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only = True)
     login_as = serializers.ChoiceField(choices=["client", "trainer", "admin"])
 
-    
-
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     
@@ -36,4 +34,8 @@ class ResetPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(min_length=6)
     
 class ResendResetOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    
+
+class ResendSignupOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
