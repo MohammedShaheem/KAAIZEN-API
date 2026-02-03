@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'admin_api',
     'nutrition',
     'workouts',
-    'trainers'
+    'trainers',
+    'personal_training'
 ]
 
 MIDDLEWARE = [

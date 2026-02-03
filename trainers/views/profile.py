@@ -1,60 +1,91 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
+
 from trainers.models import TrainerProfile
 from trainers.serializers.trainer_profile import TrainerProfileSerializer
 from trainers.permissions import IsTrainer
+
 
 class TrainerProfileView(APIView):
     permission_classes = [IsTrainer]
 
     def get_object(self, user):
-        try:
-            return TrainerProfile.objects.get(user=user)
-        except TrainerProfile.DoesNotExist:
-            return None
+        return TrainerProfile.objects.filter(user=user).first()
 
     def get(self, request):
         profile = self.get_object(request.user)
         if not profile:
             return Response(
-                {'detail': 'Profile not created yet.'},
+                {"detail": "Trainer profile not created yet."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
         serializer = TrainerProfileSerializer(profile)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         if self.get_object(request.user):
             return Response(
-                {'detail': 'Profile already exists.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Trainer profile already exists."},
+                status=status.HTTP_409_CONFLICT
             )
-            
+
         serializer = TrainerProfileSerializer(
             data=request.data,
-            context={'request': request}
+            context={"request": request}
         )
-        if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        except ValidationError as exc:
+            return Response(
+                exc.detail,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except IntegrityError:
+            return Response(
+                {"detail": "Profile creation failed due to a data conflict."},
+                status=status.HTTP_409_CONFLICT
+            )
+        except Exception:
+            return Response(
+                {"detail": "Something went wrong while creating profile."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def patch(self, request):
         profile = self.get_object(request.user)
         if not profile:
             return Response(
-                {'detail': 'Profile not created yet.'},
+                {"detail": "Trainer profile not created yet."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
         serializer = TrainerProfileSerializer(
             profile,
             data=request.data,
             partial=True,
-            context={'request': request}
+            context={"request": request}
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        except ValidationError as exc:
+            return Response(
+                exc.detail,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception:
+            return Response(
+                {"detail": "Something went wrong while updating profile."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
