@@ -16,12 +16,12 @@ Full-featured Django REST API including:
 
 ##  Tech Stack
 
-✅ Python  
-✅ Django  
-✅ Django REST Framework  
-✅ SQLite / PostgreSQL (configurable)  
-✅ JWT / Token authentication  
-✅ Environment based configuration
+ Python  
+ Django  
+ Django REST Framework  
+ SQLite / PostgreSQL (configurable)  
+ JWT / Token authentication  
+ Environment based configuration
 
 ##  Project Structure
 
