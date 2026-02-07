@@ -28,5 +28,5 @@ urlpatterns = [
     path("api/admin/workouts/", include("workouts.urls.admin")),
     path("api/client/workouts/", include("workouts.urls.client")),
     path("api/trainers/", include("trainers.urls.profile")),
-    path("api/personaltraining/", include("personal_traininig.urls")),
+    path("api/personaltraining/", include("personal_training.urls")),
 ]
