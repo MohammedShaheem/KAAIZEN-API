@@ -1,0 +1,4 @@
+from datetime import timedelta
+
+FIXED_SESSIONS_PER_WEEK = 6
+FIXED_SESSION_DURATION_MINUTES = 60

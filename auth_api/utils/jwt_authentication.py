@@ -7,8 +7,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 AUTH_EXEMPT_PATHS = [
-    "/api/auth/login/",
     "/api/auth/client_signup/",
+    "/api/auth/trainer_signup/",
+    "/api/auth/login/",
     "/api/auth/refresh/",
 ]
 

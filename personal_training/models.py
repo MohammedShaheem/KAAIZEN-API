@@ -1,9 +1,51 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from datetime import timedelta   
+
 from clients.models import ClientProfile
 from trainers.models import TrainerProfile
 from.choices import TrainingSessionStatus
+from core.models.base import UUIDModel,TimeStampedModel
 # Create your models here.
+
+class TrainingPlan(UUIDModel, TimeStampedModel):
+    
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        
+    )
+
+    duration_days = models.PositiveIntegerField(
+        unique=True,
+        
+    )
+
+    price = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        
+    )
+
+    description = models.TextField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "training_plans"
+        ordering = ["duration_days"]
+
+    def clean(self):
+        super().clean()
+
+
+        if self.price <= 0:
+            raise ValidationError("Plan price must be greater than zero.")
+
+    def __str__(self):
+        return f"{self.name} ({self.duration_days} days)"
+
+
 
 class ClientPlan(models.Model):
     client = models.ForeignKey(
@@ -12,12 +54,19 @@ class ClientPlan(models.Model):
         related_name="training_plans"
     )
 
+    plan = models.ForeignKey(
+        TrainingPlan,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="subscriptions"
+    )
+
     start_date = models.DateField()
     end_date = models.DateField()
 
     sessions_per_week = models.PositiveIntegerField(default=6)
     session_duration_minutes = models.PositiveIntegerField(default=60)
-    session_duration = models.PositiveIntegerField()
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -25,15 +74,19 @@ class ClientPlan(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["client", "is_active"]),
+            models.Index(fields=["plan"]),
         ]
+
     def clean(self):
         super().clean()
-        if self.start_date > self.end_date:
-            raise ValidationError("Plan start date cannot be after end date.")
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
+        expected_end = self.start_date + timedelta(days=self.plan.duration_days)
+
+        if self.end_date != expected_end:
+            raise ValidationError(
+                f"End date must be {self.plan.duration_days} days from start date."
+            )
+
 #####################################################################################
 
 
