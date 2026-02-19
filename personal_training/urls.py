@@ -13,6 +13,7 @@ from personal_training.views.booking.confirm_assingment_view import ConfirmAssig
 from personal_training.views.client.client_current_plan_view import ClientCurrentPlanView
 from personal_training.views.trainer.trainer_sessions_list_view import TrainerSessionListView
 from personal_training.views.trainer.trainer_session_detail_view import TrainerSessionDetailView
+from personal_training.views.video.session_video_token_view import SessionVideoTokenAPIView
 urlpatterns = [
     path("plan/",ClientPlanView.as_view()),
     # path("assignments/",ClientTrainerAssignmentView.as_view()),
@@ -28,5 +29,6 @@ urlpatterns = [
     path("my-current-plan/",ClientCurrentPlanView.as_view()),
     path("trainers/sessions/",TrainerSessionListView.as_view()),
     path("trainers/sessions/<int:session_id>/",TrainerSessionDetailView.as_view()),
+    path("sessions/<int:session_id>/video-token/",SessionVideoTokenAPIView.as_view()),
 
 ]

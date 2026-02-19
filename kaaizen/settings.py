@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'workouts',
     'trainers',
     'personal_training',
+    'ai_plan'
 ]
 
 MIDDLEWARE = [
@@ -255,3 +256,16 @@ LOGGING = {
         },
     },
 }
+
+
+# zegocloud 
+ZEGO_APP_ID = config("ZEGO_APP_ID")
+ZEGO_SERVER_SECRET = config("ZEGO_SERVER_SECRET")
+
+
+
+#gemini
+
+
+GEMINI_API_KEY = config("GEMINI_API_KEY")
+

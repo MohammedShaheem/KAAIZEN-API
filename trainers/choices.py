@@ -21,3 +21,8 @@ class ShiftType(TextChoices):
     MORNING = 'morning', 'Morning'
     EVENING = 'evening', 'Evening'
     BOTH = 'both', 'Both'
+    
+class Status(TextChoices):
+    PLANNED = 'planned', 'Planned'
+    CANCELLED = 'cancelled', 'Cancelled'
+    COMPLETED = 'completed', 'Completed'

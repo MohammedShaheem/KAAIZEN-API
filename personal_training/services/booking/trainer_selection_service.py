@@ -10,7 +10,7 @@ from personal_training.utils.client_booking_cache import (
 redis_client = settings.REDIS_CLIENT
 logger = logging.getLogger(__name__)
 
-LOCK_EXPIRY = 60 * 5  # 5 minutes
+LOCK_EXPIRY = 60 * 5  
 
 
 class TrainerSelectionService:

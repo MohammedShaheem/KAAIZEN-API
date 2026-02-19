@@ -116,7 +116,7 @@ class MealEntrySerializer(serializers.ModelSerializer):
             'app_key': settings.EDAMAM_APP_KEY,
         }
         payload = {
-            'ingr': [ingredient]  # array of strings for multi-items
+            'ingr': [ingredient]  
         }
         try:
             response = requests.post(

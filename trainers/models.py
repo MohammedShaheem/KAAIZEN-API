@@ -2,7 +2,7 @@ from django.db import models
 from django.db import models
 from django.conf import settings
 from core.models import UUIDModel, TimeStampedModel
-from .choices import Gender,Skill,ShiftType
+from .choices import Gender,Skill,ShiftType,Status
 from django.core.exceptions import ValidationError
 
 
@@ -137,6 +137,21 @@ class TrainerLeave(UUIDModel, TimeStampedModel):
         blank=True,
     )
 
+    leave_status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PLANNED
+    )
+    
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_trainer_leaves"
+    )
+
+    
     class Meta:
         db_table = "trainer_leaves"
         indexes = [
@@ -145,15 +160,19 @@ class TrainerLeave(UUIDModel, TimeStampedModel):
     
     def clean(self):
         super().clean()
-        overlapping = TrainerAvailability.objects.filter(
+
+        if self.start_date > self.end_date:
+            raise ValidationError("Leave start date must be before end date.")
+
+        overlapping = TrainerLeave.objects.filter(
             trainer=self.trainer,
-            start_time__lt=self.end_time,
-            end_time__gt=self.start_time,
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date,
         ).exclude(id=self.id)
 
         if overlapping.exists():
             raise ValidationError(
-                "This availability overlaps with an existing time slot."
+                "This leave overlaps with an existing leave."
             )
     
     def save(self, *args, **kwargs):

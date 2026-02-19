@@ -19,7 +19,7 @@ class WorkoutExperience(models.TextChoices):
     ADVANCED = "advanced","Advanced"
     
 class PreferredWorkoutType(models.TextChoices):
-    STRENGHT = "strength","Strength Training"
+    STRENGHT = "strength_training","Strength Training"
     CARDIO = "cardio","Cardio"
     YOGA = "yoga","Yoga"
     HIIT = "hiit","HIIT"

@@ -10,18 +10,18 @@ logger = logging.getLogger(__name__)
 
 
 class SlotSelectionService:
-
     @staticmethod
     def select_slot_and_fetch_trainers(client_id, start_time, end_time):
         try:
-            
+            logger.info(f'client id:',client_id)
             save_booking_field(client_id, "start_time", str(start_time))
             save_booking_field(client_id, "end_time", str(end_time))
 
            
             trainers = ClientTrainerAssignmentService.get_available_trainers(
                 start_time,
-                end_time
+                end_time,
+                client_id
             )
 
             return trainers
