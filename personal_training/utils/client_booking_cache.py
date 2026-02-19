@@ -4,7 +4,7 @@ from django.conf import settings
 redis_client = settings.REDIS_CLIENT
 
 BOOKING_KEY = "client_booking:{}"
-BOOKING_EXPIRY = 60 * 30  # 30 minutes
+BOOKING_EXPIRY = 60 * 30  
 
 
 def _get_key(client_id):

@@ -1,30 +1,11 @@
+from datetime import time
 import logging
+from datetime import time
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from trainers.models import TrainerProfile
-from personal_training.utils.client_booking_cache import (
-    get_booking_data,
-    delete_booking_data
-)
-from personal_training.services.client.client_trainer_assignment_service import (
-    ClientTrainerAssignmentService
-)
 from personal_training.models import ClientTrainerAssignment
-from clients.models import ClientProfile
-from datetime import time
-
-redis_client = settings.REDIS_CLIENT
-logger = logging.getLogger(__name__)
-
-
-import logging
-from datetime import time
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.db import transaction
-
 from trainers.models import TrainerProfile
 from clients.models import ClientProfile
 from personal_training.utils.client_booking_cache import (

@@ -9,7 +9,6 @@ class TokenRefreshError(Exception):
 def refresh_access_token(refresh_token: str):
     """
     validates refresh token, checks blacklist, and returns new access token.
-    returns: access_token (str)
     """
 
     if not refresh_token:

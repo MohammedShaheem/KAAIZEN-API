@@ -6,6 +6,7 @@ from django.utils.timezone import now
 
 from personal_training.models import ClientTrainerAssignment, TrainingSession
 from trainers.models import TrainerProfile
+from clients.models import ClientProfile
 from personal_training.constant.scheduling import SESSIONS_PER_CYCLE
 
 logger = logging.getLogger(__name__)
@@ -14,14 +15,33 @@ logger = logging.getLogger(__name__)
 class ClientTrainerAssignmentService:
 
     @staticmethod
-    def get_available_trainers(start_time, end_time):
-        busy_trainers = TrainingSession.objects.filter(
-            start_time__lt=end_time,
-            end_time__gt=start_time,
-            status="scheduled"
-        ).values_list("trainer_id", flat=True)
+    def get_available_trainers(start_time, end_time, client_id):
+    
+    
+            client = ClientProfile.objects.only("preferred_workout_type").get(
+                user_id=client_id
+            )
+            preferred_workout = [client.preferred_workout_type]
+           
 
-        return TrainerProfile.objects.exclude(id__in=busy_trainers)
+            
+            busy_trainers = TrainingSession.objects.filter(
+                start_time__lt=end_time,
+                end_time__gt=start_time,
+                status="scheduled"
+            ).values_list("trainer_id", flat=True) 
+            logger.info(f'busy trainers:',busy_trainers) 
+            available_trainers = TrainerProfile.objects.filter(
+                skills__contains=preferred_workout, 
+                is_active=True,
+                is_verified=True,
+            ).exclude(
+                id__in=busy_trainers
+            )
+            logger.info(f'available trainer:',available_trainers)
+
+            return available_trainers
+        
 
     @staticmethod
     def assign_trainer_and_create_sessions(

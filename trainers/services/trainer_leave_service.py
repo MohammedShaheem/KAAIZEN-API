@@ -7,15 +7,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from ..choices import Status
 from trainers.models import TrainerLeave
+from trainers.services.trainer_leave_reassignment_service import TrainerReassignmentService
 
 class TrainerLeaveService:
     MAX_LEAVES_PER_MONTH = 2
-    
     """
-    for figuring start and end of the month
+    for finding start and end of the month
     """
-    
     @staticmethod
     def _get_month_range(target_date: date):
         try:
@@ -50,9 +50,11 @@ class TrainerLeaveService:
 
             leave_count = TrainerLeave.objects.filter(
                 trainer=trainer,
-                start_date__gte=month_start,
-                start_date__lt=month_end
+                leave_status=Status.PLANNED,
+                start_date__lt=month_end,
+                end_date__gte=month_start,
             ).count()
+
 
         except DatabaseError as e:
             logger.exception("Database error while checking leave limit")
@@ -121,11 +123,16 @@ class TrainerLeaveService:
             )
 
             leave = TrainerLeave.objects.create(
-                trainer=trainer,
-                start_date=start_date,
-                end_date=end_date,
-                reason=reason
-            )
+            trainer=trainer,
+            start_date=start_date,
+            end_date=end_date,
+            reason=reason,
+            leave_status=Status.PLANNED,
+            created_by=trainer.user,
+        )
+            TrainerReassignmentService.process_leave_reassignment(leave)
+
+
 
             return leave
 

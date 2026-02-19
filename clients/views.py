@@ -40,8 +40,14 @@ class ClientProfileView(APIView):
             data=request.data,
             context={"request": request}
         )
+        serializer.is_valid(raise_exception=False)
+
         if not serializer.is_valid():
+            print(serializer.errors) 
             return Response(serializer.errors, status=400)
+
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=400)
 
         serializer.is_valid(raise_exception=True)
         serializer.save()

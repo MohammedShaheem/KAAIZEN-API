@@ -44,7 +44,7 @@ class ClientProfile(UUIDModel, TimeStampedModel):
     goal_speed = models.CharField(max_length=50,
                                   choices=GoalSpeed.choices,
                                   null=True,blank=True)
-    
+      
     diet_preference = models.CharField(max_length=50,
                                        choices=DietPreference.choices,
                                        null=True,blank=True)

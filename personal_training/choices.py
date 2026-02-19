@@ -2,6 +2,7 @@ from django.db.models import TextChoices
 
 
 class TrainingSessionStatus(TextChoices):
+    REASSIGNED = 'reassigned','Reassigned'
     SCHEDULED = "scheduled", "Scheduled"
     COMPLETED = "completed", "Completed"
     CANCELED_EARLY = "canceled_early", "Canceled Early"

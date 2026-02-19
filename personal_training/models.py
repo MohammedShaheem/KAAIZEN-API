@@ -144,6 +144,35 @@ class TrainingSession(models.Model):
     session_date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+    
+    scheduled_start = models.DateTimeField(db_index=True,null=True)
+    scheduled_end = models.DateTimeField(db_index=True,null=True)
+    
+    
+    room_id = models.CharField(
+        max_length=150,
+        unique=True,
+        null = True,
+    )
+
+
+
+    video_session_started_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    video_session_ended_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    
+    
+    
+    recording_url = models.URLField(
+        blank=True,
+    )
+    
 
     status = models.CharField(
         max_length=30,
@@ -152,10 +181,13 @@ class TrainingSession(models.Model):
     )
 
     created_by_system = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    cancelled_by_trainer = models.BooleanField(default=False)
+
 
     class Meta:
         db_table = "training_sessions"
+        ordering = ["-scheduled_start"]
         indexes = [
             models.Index(fields=["trainer", "session_date"]),
             models.Index(fields=["client", "session_date"]),
