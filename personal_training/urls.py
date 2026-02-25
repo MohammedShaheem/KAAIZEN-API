@@ -9,11 +9,16 @@ from personal_training.views.client.public_plan_detail_view import PublicTrainin
 from personal_training.views.booking.session_type_selection_view import SessionTypeSelectionView
 from personal_training.views.booking.slot_selection_view import SlotSelectionView
 from personal_training.views.booking.trainer_selection_view import TrainerSelectionView
+from personal_training.views.booking.start_date_selection_view import StartDateSelectionView
 from personal_training.views.booking.confirm_assingment_view import ConfirmAssignmentView
 from personal_training.views.client.client_current_plan_view import ClientCurrentPlanView
 from personal_training.views.trainer.trainer_sessions_list_view import TrainerSessionListView
 from personal_training.views.trainer.trainer_session_detail_view import TrainerSessionDetailView
 from personal_training.views.video.session_video_token_view import SessionVideoTokenAPIView
+from personal_training.views.client.payment_view import CreateCheckoutSessionView
+
+from personal_training.views.stripe.stripe_webhook import stripe_webhook
+
 urlpatterns = [
     path("plan/",ClientPlanView.as_view()),
     # path("assignments/",ClientTrainerAssignmentView.as_view()),
@@ -25,10 +30,14 @@ urlpatterns = [
     path("session-type/",SessionTypeSelectionView.as_view()),
     path("select-slot/",SlotSelectionView.as_view()),
     path("select-trainer/",TrainerSelectionView.as_view()),
+    path("select-startdate/",StartDateSelectionView.as_view()),
     path("confirm-assignment/",ConfirmAssignmentView.as_view()),
     path("my-current-plan/",ClientCurrentPlanView.as_view()),
     path("trainers/sessions/",TrainerSessionListView.as_view()),
     path("trainers/sessions/<int:session_id>/",TrainerSessionDetailView.as_view()),
     path("sessions/<int:session_id>/video-token/",SessionVideoTokenAPIView.as_view()),
+    path("payments/checkout/",CreateCheckoutSessionView.as_view()),
+    path("stripe/webhook/", stripe_webhook),
+    
 
 ]

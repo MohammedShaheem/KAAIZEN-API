@@ -8,6 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 
 
+
 class AdminWorkoutCategoryListCreateView(APIView):
     permission_classes = [IsAdmin]
 
@@ -73,11 +74,12 @@ class AdminWorkoutListCreateView(APIView):
         serializer = AdminWorkoutSerializer(data=request.data)
         
         if not serializer.is_valid():
-            print("SERIALIZER ERRORS:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.is_valid(raise_exception=True)
 
         workout = serializer.save()
+        create_stripe_product(workout)
+        
 
         return Response(
             AdminWorkoutSerializer(workout).data,

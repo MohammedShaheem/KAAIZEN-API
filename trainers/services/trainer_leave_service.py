@@ -130,10 +130,10 @@ class TrainerLeaveService:
             leave_status=Status.PLANNED,
             created_by=trainer.user,
         )
-            TrainerReassignmentService.process_leave_reassignment(leave)
-
-
-
+        #reassignment only works after commit, on_commit only takes a funtion.
+            transaction.on_commit(
+            lambda: TrainerReassignmentService.process_leave_reassignment(leave)
+        )
             return leave
 
         except ValidationError:

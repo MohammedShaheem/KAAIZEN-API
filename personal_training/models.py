@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from clients.models import ClientProfile
 from trainers.models import TrainerProfile
-from.choices import TrainingSessionStatus
+from.choices import TrainingSessionStatus, PlanStatusChoice, PaymentStatusChoice
 from core.models.base import UUIDModel,TimeStampedModel
 # Create your models here.
 
@@ -30,6 +30,9 @@ class TrainingPlan(UUIDModel, TimeStampedModel):
     description = models.TextField(blank=True)
 
     is_active = models.BooleanField(default=True)
+    
+    stripe_product_id = models.CharField(max_length=100, blank=True, null=True)
+    stripe_price_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         db_table = "training_plans"
@@ -61,9 +64,18 @@ class ClientPlan(models.Model):
         on_delete=models.PROTECT,
         related_name="subscriptions"
     )
+    
+    stripe_subscription_id = models.CharField(max_length=100, blank=True, null=True)
+    stripe_checkout_session_id = models.CharField(max_length=100, blank=True, null=True)
+    
+    status = models.CharField(
+        max_length = 20,
+        choices = PlanStatusChoice.choices,
+        default = PlanStatusChoice.PENDING
+    )
 
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_date = models.DateField(null=True,blank=True)
+    end_date = models.DateField(null=True,blank=True)
 
     sessions_per_week = models.PositiveIntegerField(default=6)
     session_duration_minutes = models.PositiveIntegerField(default=60)
@@ -268,3 +280,51 @@ class DeferredCredit(models.Model):
             models.Index(fields=["client", "is_redeemed"]),
         ]
         
+#########################################################################################
+class Payment(models.Model):
+    
+    client = models.ForeignKey(
+        ClientProfile,
+        on_delete=models.PROTECT
+    )
+
+    client_plan = models.ForeignKey(
+        ClientPlan,
+        on_delete=models.PROTECT
+    )
+
+    stripe_payment_intent_id = models.CharField(
+        max_length=100,
+        unique=True,
+        db_index=True
+    )
+
+    stripe_invoice_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        unique=True
+    )
+
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+
+    currency = models.CharField(max_length=10, default="INR")
+
+    status = models.CharField(
+        max_length=20,
+        choices=PaymentStatusChoice.choices
+    )
+
+    stripe_raw_response = models.JSONField(
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["client"]),
+            models.Index(fields=["client_plan"]),
+            models.Index(fields=["status"]),
+        ]

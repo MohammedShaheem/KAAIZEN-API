@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     #third party
     'rest_framework',
     'corsheaders',
+    'django_celery_beat',
     
     #apps
     'core',
@@ -54,7 +55,8 @@ INSTALLED_APPS = [
     'workouts',
     'trainers',
     'personal_training',
-    'ai_plan'
+    'ai_plan',
+    'wallet'
 ]
 
 MIDDLEWARE = [
@@ -265,7 +267,32 @@ ZEGO_SERVER_SECRET = config("ZEGO_SERVER_SECRET")
 
 
 #gemini
-
-
 GEMINI_API_KEY = config("GEMINI_API_KEY")
 
+
+#celery 
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/1"
+
+# configuring periodic task
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "maintain-rolling-sessions": {
+        "task": "personal_training.tasks.maintain_sessions",
+        # runs daily at 2am
+        "schedule": crontab(hour=2, minute=0),  
+    },
+}
+
+
+#stripe
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
+
+
+
+# frontend
+FRONTEND_URL = "http://localhost:5173"

@@ -1,5 +1,7 @@
 from django.db.models import Count, Q
 from django.utils.timezone import now
+import stripe
+from django.conf import settings
 from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError, DatabaseError
@@ -34,27 +36,51 @@ class TrainingPlanService:
             if TrainingPlan.objects.filter(name__iexact=name.strip()).exists():
                 raise ValidationError("A plan with this name already exists.")
 
+            stripe_product = stripe.Product.create(
+                name=name.strip(),
+                description=description.strip()
+            )
+            
+            stripe_price = stripe.Price.create(
+                product=stripe_product.id,
+                unit_amount=int(float(price) * 100),
+                currency="inr",
+                recurring={
+                    "interval": "month"
+                }
+            )
+            
+            
             plan = TrainingPlan.objects.create(
                 name=name.strip(),
                 duration_days=duration_days,
                 price=price,
                 description=description.strip(),
-                is_active=is_active
+                is_active=is_active,
+                stripe_product_id=stripe_product.id,
+                stripe_price_id=stripe_price.id,
             )
-
             logger.info(
-                "Training plan created | id=%s | name=%s | duration=%s | price=%s",
+                "Training plan created with Stripe | id=%s | stripe_product=%s | stripe_price=%s",
                 plan.id,
-                plan.name,
-                plan.duration_days,
-                plan.price
+                stripe_product.id,
+                stripe_price.id
             )
 
+            
             return plan
 
         except ValidationError:
             raise
+        
+        except stripe.error.StripeError as e:
+            logger.error("Stripe error while creating plan: %s", str(e))
+            raise ValidationError("Stripe error while creating plan.")
 
+        except Exception as e:
+            logger.error("Unexpected error: %s", str(e))
+            raise
+        
         except IntegrityError as e:
             logger.exception("Integrity error while creating training plan")
             raise ValidationError(
