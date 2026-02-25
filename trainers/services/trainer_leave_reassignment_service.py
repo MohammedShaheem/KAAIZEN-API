@@ -47,6 +47,7 @@ class TrainerReassignmentService:
     @staticmethod
     @transaction.atomic
     def process_leave_reassignment(leave: TrainerLeave):
+        logger.info("entering here from process leave reassignment service")
         if leave.leave_status != Status.PLANNED:
             return
         #taking the the sessions assigned to the trainer, avoiding race condition.
@@ -63,7 +64,7 @@ class TrainerReassignmentService:
                 session=session,
                 excluded_trainer=leave.trainer,
             )
-
+            #if replacement found replacing otherwise cancelling session    ``
             if replacement:
                 session.trainer = replacement
                 session.status = TrainingSessionStatus.REASSIGNED

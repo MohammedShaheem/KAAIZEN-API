@@ -16,6 +16,10 @@ from personal_training.services.booking.confirm_assignment_service import (
 
 
 class ConfirmAssignmentView(APIView):
+    
+    """
+    
+    """
     permission_classes = [IsClient]
 
     def post(self, request):

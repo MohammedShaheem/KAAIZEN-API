@@ -15,7 +15,7 @@ class SlotService:
     @staticmethod
     def generate_and_store_slots(client_id, session_type):
         """
-        Stores selected session_type in redis
+        stores selected session_type in redis
         and returns generated slots
         """
 

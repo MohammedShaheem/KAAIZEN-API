@@ -1,11 +1,11 @@
 from datetime import time
 import logging
-from datetime import time
+from datetime import time,date,timedelta
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from personal_training.models import ClientTrainerAssignment
+from personal_training.models import ClientTrainerAssignment,ClientPlan
 from trainers.models import TrainerProfile
 from clients.models import ClientProfile
 from personal_training.utils.client_booking_cache import (
@@ -21,10 +21,15 @@ logger = logging.getLogger(__name__)
 
 
 class ConfirmAssignmentService:
-
+    """
+    1. checking for the client already assigned.
+    2. from the redis getting the booking data.
+    3. fetching trainer.
+    """
     @staticmethod
     @transaction.atomic
     def confirm(client):
+        print("entering here from confirm of confirm assignmentservice")
         client_profile = ClientProfile.objects.get(user=client)
 
         existing = ClientTrainerAssignment.objects.filter(
@@ -37,12 +42,26 @@ class ConfirmAssignmentService:
             return existing
 
         booking = get_booking_data(client.id)
+        
         if not booking:
             raise ValidationError("Booking session expired.")
 
+        client_plan = ClientPlan.objects.filter(
+            client=client_profile,
+            status="paid",
+            is_active=False
+        ).order_by("-created_at").first()
+
+        if not client_plan:
+            raise ValidationError("No paid plan found.")
+        
+        print(ClientPlan.objects.filter(client=client_profile).values())
         trainer_id = booking.get("trainer_id")
         start_time_raw = booking.get("start_time")
+        logger.info(f"start time form confirm assignment{start_time_raw}")
         end_time_raw = booking.get("end_time")
+        start_date = booking.get("start_date")
+        logger.info(f"end time form confirm assignment{end_time_raw}")
 
         if not trainer_id or not start_time_raw or not end_time_raw:
             raise ValidationError("Incomplete booking data.")
@@ -57,12 +76,24 @@ class ConfirmAssignmentService:
         end_time = time.fromisoformat(end_time_raw)
 
         trainer = TrainerProfile.objects.get(id=trainer_id)
+        
+        start_date_obj = date.fromisoformat(start_date)
+
+        end_date = start_date_obj + timedelta(
+            days=client_plan.plan.duration_days
+        )
+        client_plan.start_date = start_date_obj
+        client_plan.end_date = end_date
+        client_plan.status = "active"
+        client_plan.is_active = True
+        client_plan.save()
 
         assignment = ClientTrainerAssignmentService.assign_trainer_and_create_sessions(
             client=client_profile,
             trainer=trainer,
             preferred_start_time=start_time,
-            preferred_end_time=end_time
+            preferred_end_time=end_time,
+            start_date = start_date,
         )
 
         try:
