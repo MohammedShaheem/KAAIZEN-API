@@ -78,7 +78,7 @@ class AdminWorkoutListCreateView(APIView):
         serializer.is_valid(raise_exception=True)
 
         workout = serializer.save()
-        create_stripe_product(workout)
+        
         
 
         return Response(

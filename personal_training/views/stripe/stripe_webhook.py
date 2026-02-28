@@ -30,6 +30,7 @@ def stripe_webhook(request):
     event_type = event["type"]
 
     if event_type == "checkout.session.completed":
+        
         session = event["data"]["object"]
         if session:
             PaymentService.handle_successful_payment(session)

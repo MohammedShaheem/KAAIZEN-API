@@ -45,9 +45,9 @@ class TrainingPlanService:
                 product=stripe_product.id,
                 unit_amount=int(float(price) * 100),
                 currency="inr",
-                recurring={
-                    "interval": "month"
-                }
+                # recurring={
+                #     "interval": "month"
+                # }
             )
             
             

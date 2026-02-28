@@ -20,11 +20,13 @@ class TrainerSelectionView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-
-            TrainerSelectionService.select_trainer_and_lock_slot(
-                client_id=request.user.id,
-                trainer_id=serializer.validated_data["trainer_id"]
-            )
+            try:
+                TrainerSelectionService.select_trainer_and_lock_slot(
+                    client_id=request.user.id,
+                    trainer_id=serializer.validated_data["trainer_id"]
+                )
+            except Exception as e:
+                print("error form trainerselection",e)
 
             return Response(
                 {"detail": "Trainer reserved successfully"},

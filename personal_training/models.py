@@ -12,43 +12,65 @@ class TrainingPlan(UUIDModel, TimeStampedModel):
     
     name = models.CharField(
         max_length=100,
-        unique=True,
-        
+        unique=True
     )
 
-    duration_days = models.PositiveIntegerField(
-        unique=True,
-        
+    duration_days = models.PositiveIntegerField()
+
+    weeks = models.PositiveIntegerField(
+        blank=True,null=True
+    )
+
+    total_sessions = models.PositiveIntegerField(
+        blank=True,
+        null=True
     )
 
     price = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        
+        max_digits=10,
+        decimal_places=2
     )
 
     description = models.TextField(blank=True)
 
     is_active = models.BooleanField(default=True)
-    
-    stripe_product_id = models.CharField(max_length=100, blank=True, null=True)
-    stripe_price_id = models.CharField(max_length=100, blank=True, null=True)
+
+    stripe_product_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_index=True
+    )
+
+    stripe_price_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_index=True
+    )
 
     class Meta:
         db_table = "training_plans"
         ordering = ["duration_days"]
+        indexes = [
+            models.Index(fields=["duration_days"]),
+            models.Index(fields=["price"]),
+            models.Index(fields=["is_active"]),
+        ]
 
     def clean(self):
-        super().clean()
+        if self.duration_days < 7:
+            raise ValidationError("Duration must be at least 7 days.")
 
-
-        if self.price <= 0:
-            raise ValidationError("Plan price must be greater than zero.")
+    def save(self, *args, **kwargs):
+        self.weeks = self.duration_days // 7
+        self.total_sessions = self.weeks * 6
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} ({self.duration_days} days)"
+        return f"{self.name} - {self.weeks} Weeks - ₹{self.price}"
 
-
+#####################################################################################
 
 class ClientPlan(models.Model):
     client = models.ForeignKey(
@@ -73,7 +95,12 @@ class ClientPlan(models.Model):
         choices = PlanStatusChoice.choices,
         default = PlanStatusChoice.PENDING
     )
-
+    
+    total_price = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
+    per_session_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True,null=True)
+    
+    total_session = models.IntegerField(blank=True,null=True)
+    
     start_date = models.DateField(null=True,blank=True)
     end_date = models.DateField(null=True,blank=True)
 
@@ -152,11 +179,34 @@ class TrainingSession(models.Model):
         on_delete=models.CASCADE,
         related_name="training_sessions"
     )
+    
+    client_plan = models.ForeignKey(
+        ClientPlan,
+        on_delete=models.PROTECT,
+        related_name="sessions",
+        db_index=True,
+        blank=True,null=True
+    )
 
     session_date = models.DateField()
+    
     start_time = models.TimeField()
     end_time = models.TimeField()
     
+    session_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True,null=True)
+    
+    trainer_share_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,null=True
+    )
+
+    admin_share_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,null=True
+    )
+
     scheduled_start = models.DateTimeField(db_index=True,null=True)
     scheduled_end = models.DateTimeField(db_index=True,null=True)
     

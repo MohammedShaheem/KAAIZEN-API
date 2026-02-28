@@ -18,6 +18,7 @@ class CreateCheckoutSessionView(APIView):
     permission_classes = [IsClient]
 
     def post(self, request):
+        print("entering here create shceckout session view")
         serializer = CreateCheckoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -25,6 +26,7 @@ class CreateCheckoutSessionView(APIView):
         plan = serializer.validated_data["plan_id"]
 
         session = PaymentService.create_checkout_session(client, plan)
+        
 
         return Response({
             "checkout_url": session.url
