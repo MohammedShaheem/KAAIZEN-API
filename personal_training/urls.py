@@ -21,7 +21,6 @@ from personal_training.views.stripe.stripe_webhook import stripe_webhook
 
 urlpatterns = [
     path("plan/",ClientPlanView.as_view()),
-    # path("assignments/",ClientTrainerAssignmentView.as_view()),
     path("cancellations/",SessionCancellationView.as_view()),
     path("admin/training-plans/", TrainingPlanAdminView.as_view()),
     path("public/training-plans/", PublicTrainingPlanListView.as_view()),

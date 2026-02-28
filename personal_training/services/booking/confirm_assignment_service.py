@@ -29,7 +29,7 @@ class ConfirmAssignmentService:
     @staticmethod
     @transaction.atomic
     def confirm(client):
-        print("entering here from confirm of confirm assignmentservice")
+        
         client_profile = ClientProfile.objects.get(user=client)
 
         existing = ClientTrainerAssignment.objects.filter(
@@ -55,7 +55,6 @@ class ConfirmAssignmentService:
         if not client_plan:
             raise ValidationError("No paid plan found.")
         
-        print(ClientPlan.objects.filter(client=client_profile).values())
         trainer_id = booking.get("trainer_id")
         start_time_raw = booking.get("start_time")
         logger.info(f"start time form confirm assignment{start_time_raw}")
@@ -91,6 +90,7 @@ class ConfirmAssignmentService:
         assignment = ClientTrainerAssignmentService.assign_trainer_and_create_sessions(
             client=client_profile,
             trainer=trainer,
+            client_plan = client_plan,
             preferred_start_time=start_time,
             preferred_end_time=end_time,
             start_date = start_date,

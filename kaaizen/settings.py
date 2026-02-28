@@ -98,7 +98,7 @@ AUTH_USER_MODEL = "users.User"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'kaaizendb',        
+        'NAME': 'KaaizenDB',        
         'USER': 'postgres',           
         'PASSWORD': 'postgres1234',   
         'HOST': 'localhost',          
@@ -106,7 +106,7 @@ DATABASES = {
     }
 }
 
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 #initial tasks
 CORS_ALLOWED_ORIGINS = [
@@ -282,6 +282,7 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     "maintain-rolling-sessions": {
         "task": "personal_training.tasks.maintain_sessions",
+        "task": "wallet.tasks.run_admin_daily_settlement",
         # runs daily at 2am
         "schedule": crontab(hour=2, minute=0),  
     },
@@ -296,3 +297,8 @@ STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
 
 # frontend
 FRONTEND_URL = "http://localhost:5173"
+
+
+
+# firebase
+import core.firebase

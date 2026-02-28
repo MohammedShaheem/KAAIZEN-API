@@ -1,22 +1,19 @@
 import time
-import hmac
-import hashlib
-import base64
-import json
+
 import logging
 from typing import Dict
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from personal_training.utils.zego_token import generate_token04
 
 logger = logging.getLogger(__name__)
 
 
 class ZegoTokenService:
-    DEFAULT_EXPIRY_SECONDS = 3600  # 1 hour
+    DEFAULT_EXPIRY_SECONDS = 3600  
 
     @staticmethod
-    def generate(user_id: str, room_id: str, expiry_seconds: int = None) -> Dict[str, str]:
-        
+    def generate(user_id, room_id, expiry_seconds):
     
 
         try:
@@ -42,26 +39,8 @@ class ZegoTokenService:
             expiry = expiry_seconds or ZegoTokenService.DEFAULT_EXPIRY_SECONDS
             expire_time = int(time.time()) + expiry
             
-            payload = {
-                "app_id": app_id,
-                "user_id": user_id,
-                "room_id": room_id,
-                "exp": expire_time,
-            }
-
-            #converting payload dictionary into json string
-            payload_json = json.dumps(payload, separators=(",", ":"))
-
-            #creating signature converting hmac object into bytes
-            signature = hmac.new(
-                server_secret.encode("utf-8"),
-                payload_json.encode("utf-8"),
-                hashlib.sha256,
-            ).digest()
-            
-            #creating token coverting to string
-            token_bytes = signature + payload_json.encode("utf-8")
-            token = base64.b64encode(token_bytes).decode("utf-8")
+           
+            token = generate_token04(app_id,server_secret,user_id,room_id,expiry_seconds)
 
             return {
                 "appID": app_id,

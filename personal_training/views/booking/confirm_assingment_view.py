@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ValidationError
+import traceback
 
 from clients.permissions import IsClient
 from personal_training.serializers.booking.confirm_assignment_serializer import (
@@ -27,10 +28,14 @@ class ConfirmAssignmentView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-
-            assignment = ConfirmAssignmentService.confirm(
-                client=request.user
-            )
+            try:
+                assignment = ConfirmAssignmentService.confirm(
+                    client=request.user
+                )
+            except Exception as e:
+                print("error from confirm assignment",e)
+                traceback.print_exc()
+                raise
 
             return Response(
                 ClientTrainerAssignmentSerializer(assignment).data,
@@ -43,7 +48,9 @@ class ConfirmAssignmentView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        except Exception:
+        except Exception as e:
+            print("Error in confirm service",e)
+            traceback.print_exc()
             return Response(
                 {"detail": "Unexpected error occurred."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
