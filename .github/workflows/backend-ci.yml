@@ -3,8 +3,8 @@ name: Build and Push Backend Image
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - Main
+  
 
 jobs:
   build-and-push:
