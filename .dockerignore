@@ -1,0 +1,28 @@
+# creating docker ignore
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+.Python
+
+# virtual environment
+venv/
+env/
+.venv/
+
+
+.env
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# IDE
+.vscode/
+.idea/

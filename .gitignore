@@ -1,3 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 
+# Virtual Environment
+env/
+venv/
+ENV/
+
+# Logs
+*.log
+
+# Django
+db.sqlite3
+
+# Environment variables
 .env
 
+# Celery
+celerybeat-schedule*
+
+# OS
+.DS_Store
+
+# VSCode
+.vscode/
+
+
+gunicorn.ctl
