@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'trainers',
     'personal_training',
     'ai_plan',
-    'wallet'
+    'wallet',
+    'notification'
 ]
 
 MIDDLEWARE = [
@@ -98,11 +99,11 @@ AUTH_USER_MODEL = "users.User"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'KaaizenDB',        
-        'USER': 'postgres',           
-        'PASSWORD': 'postgres1234',   
-        'HOST': 'localhost',          
-        'PORT': '5432',               
+        'NAME': config('DB_NAME'),        
+        'USER': config('DB_USER'),           
+        'PASSWORD': config('DB_PASSWORD'),   
+        'HOST': config('DB_HOST'),          
+        'PORT': config('DB_PORT'),               
     }
 }
 
@@ -110,7 +111,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 #initial tasks
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    config('FRONTEND_URL'),
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -133,11 +134,11 @@ REST_FRAMEWORK = {
 import redis
 
 REDIS_CLIENT = redis.Redis(
-    host='redis-15268.c330.asia-south1-1.gce.cloud.redislabs.com',
-    port=15268,
+    host=config('REDIS_HOST'),
+    port=config('REDIS_PORT'),
     decode_responses=True,
-    username="default",
-    password="rP5wDD8t8akLPtxa9XT5tTEh24fYEz8L",
+    username=config('REDIS_USERNAME'),
+    password=config('REDIS_PASSWORD'),
 )
 
 
@@ -166,7 +167,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 
@@ -181,18 +182,18 @@ STATIC_URL = 'static/'
 
 # Email configurations
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = "mohammedshaheemtk2@gmail.com"
-EMAIL_HOST_PASSWORD = "oyjh rygh wxyu oqxz"  
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 #GOOGGLE AUTH
-GOOGLE_CLIENT_ID = "894057529356-qrjrk44locrntnhtusvvavg6n0mrtup1.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID')
 
 
 
@@ -271,20 +272,37 @@ GEMINI_API_KEY = config("GEMINI_API_KEY")
 
 
 #celery 
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/1"
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
+
+
+CELERY_TIMEZONE = "Asia/Kolkata"
+CELERY_ENABLE_UTC = False
+
 
 # configuring periodic task
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
+
+    #  Personal Training 
     "maintain-rolling-sessions": {
         "task": "personal_training.tasks.maintain_sessions",
+        "schedule": crontab(hour=2, minute=0),
+    },
+
+    # Wallet Settlement 
+    "admin-daily-settlement": {
         "task": "wallet.tasks.run_admin_daily_settlement",
-        # runs daily at 2am
-        "schedule": crontab(hour=2, minute=0),  
+        "schedule": crontab(hour=2, minute=0),
+    },
+
+    #  Tracking Reminder 
+    "send-tracking-reminders-every-minute": {
+        "task": "notification.tasks.send_tracking_reminder.send_tracking_reminders",
+        "schedule": crontab(minute="*"),   
     },
 }
 
@@ -296,7 +314,7 @@ STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
 
 
 # frontend
-FRONTEND_URL = "http://localhost:5173"
+FRONTEND_URL = config('FRONTEND_URL')
 
 
 
