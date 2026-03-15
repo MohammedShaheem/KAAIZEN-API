@@ -40,6 +40,11 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 787831201093.dkr.ecr.ap-south-1.amazonaws.com
+
           docker pull 787831201093.dkr.ecr.ap-south-1.amazonaws.com/kaaizen-backend:latest
+
+          docker stop kaaizen-backend || true
+          docker rm kaaizen-backend || true
+
           docker-compose down
           docker-compose up -d
