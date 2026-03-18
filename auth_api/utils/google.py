@@ -9,8 +9,5 @@ def verify_google_token(token):
             requests.Request(),
             settings.GOOGLE_CLIENT_ID
         )
-        print("TOKEN VERIFIED:", payload)
-        return payload
-    except ValueError as e:
-        print("TOKEN ERROR:", str(e))  
+    except ValueError:
         return None
