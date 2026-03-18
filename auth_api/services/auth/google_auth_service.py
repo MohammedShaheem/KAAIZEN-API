@@ -65,4 +65,7 @@ def handle_google_auth(id_token: str):
             return user, refresh, has_profile
 
     except Exception as e:
-        raise GoogleAuthError("Failed to authenticate user") from e
+        print("GOOGLE AUTH ERROR:", str(e))   
+        import traceback
+        traceback.print_exc()                 
+        raise GoogleAuthError(str(e))         
