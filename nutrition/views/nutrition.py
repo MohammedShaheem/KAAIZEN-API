@@ -30,6 +30,7 @@ class MealEntryListByDateView(APIView):
         )
 
         serializer = MealEntrySerializer(entries, many=True)
+        
         return Response(serializer.data)
 
 
@@ -46,7 +47,7 @@ class DailyNutritionSummaryView(APIView):
             carbs=Sum("carbs_grams"),
             fat=Sum("fat_grams"),
         )
-
+        
         return Response({
             # "date": date,
             "summary": summary
