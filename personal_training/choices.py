@@ -5,6 +5,7 @@ class TrainingSessionStatus(TextChoices):
     REASSIGNED = 'reassigned','Reassigned'
     SCHEDULED = "scheduled", "Scheduled"
     COMPLETED = "completed", "Completed"
+    ONGOING = "ongoing", "Ongoing"
     CANCELED_EARLY = "canceled_early", "Canceled Early"
     CANCELED_LATE = "canceled_late", "Canceled Late"
     NO_SHOW = "no_show", "No Show"

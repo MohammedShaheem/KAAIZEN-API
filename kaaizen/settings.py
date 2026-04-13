@@ -28,9 +28,15 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG",cast=bool)
 
 ALLOWED_HOSTS = [
+    "kaaizen.shaheem.site",
+    "13.201.67.122",
     "localhost",
     "127.0.0.1",
-    "13.201.67.122",
+]
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://kaaizen.shaheem.site",
 ]
 
 
@@ -306,7 +312,7 @@ CELERY_BEAT_SCHEDULE = {
     #  Tracking Reminder 
     "send-tracking-reminders-every-minute": {
         "task": "notification.tasks.send_tracking_reminder.send_tracking_reminders",
-        "schedule": crontab(minute="*"),   
+        "schedule": crontab(minute=0, hour="*/2"),   
     },
 }
 

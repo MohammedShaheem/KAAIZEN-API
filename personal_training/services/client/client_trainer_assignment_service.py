@@ -7,6 +7,7 @@ from django.utils import timezone
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 import uuid
+from django.db.models import Q
 
 
 
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 class ClientTrainerAssignmentService:
 
     @staticmethod
-    def get_available_trainers(start_time, end_time, client_id):   
+    def get_available_trainers(start_time, end_time, client_id, session_type):   
             client = ClientProfile.objects.only("preferred_workout_type").get(
                 user_id=client_id
             )
@@ -35,11 +36,17 @@ class ClientTrainerAssignmentService:
                 end_time__gt=start_time,
                 status="scheduled"
             ).values_list("trainer_id", flat=True) 
+            
+            shift_filter = Q(shift_type=session_type) | Q(shift_type="both")
+            
             logger.info(f'busy trainers:',busy_trainers) 
+            
             available_trainers = TrainerProfile.objects.filter(
-                skills__contains=preferred_workout, 
+                skills__contains=preferred_workout,
                 is_active=True,
                 is_verified=True,
+            ).filter(
+                shift_filter
             ).exclude(
                 id__in=busy_trainers
             )

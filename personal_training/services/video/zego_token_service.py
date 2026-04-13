@@ -4,7 +4,7 @@ import logging
 from typing import Dict
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from personal_training.utils.zego_token import generate_token04
+from personal_training.utils.zego_kit_token import generate_kit_token
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class ZegoTokenService:
     DEFAULT_EXPIRY_SECONDS = 3600  
 
     @staticmethod
-    def generate(user_id, room_id, expiry_seconds):
+    def generate(user_id, room_id, expiry_seconds,username):
     
 
         try:
@@ -40,7 +40,14 @@ class ZegoTokenService:
             expire_time = int(time.time()) + expiry
             
            
-            token = generate_token04(app_id,server_secret,user_id,room_id,expiry_seconds)
+            token = generate_kit_token(
+                    app_id=app_id,
+                    server_secret=server_secret,
+                    room_id=room_id,
+                    user_id=user_id,
+                    user_name=username,
+                    expiry_seconds=expiry_seconds
+                )
 
             return {
                 "appID": app_id,

@@ -34,6 +34,7 @@ class ResetPasswordView(APIView):
             )
 
         except ValidationError as e:
+            print("VALIDATION ERROR:", e)
             return Response(
                 {
                     "error": {
@@ -45,6 +46,7 @@ class ResetPasswordView(APIView):
             )
 
         except ResetTokenError as e:
+            print("Token ERROR:", e)
             return Response(
                 {
                     "error": {
@@ -67,6 +69,7 @@ class ResetPasswordView(APIView):
             )
 
         except SamePasswordError as e:
+            print("same password:", e)
             return Response(
                 {
                     "error": {

@@ -207,8 +207,8 @@ class TrainingSession(models.Model):
         blank=True,null=True
     )
 
-    scheduled_start = models.DateTimeField(db_index=True,null=True)
-    scheduled_end = models.DateTimeField(db_index=True,null=True)
+    scheduled_start = models.DateTimeField(db_index=True,null=True, blank=True)
+    scheduled_end = models.DateTimeField(db_index=True,null=True, blank=True)
     
     
     room_id = models.CharField(
@@ -221,12 +221,18 @@ class TrainingSession(models.Model):
 
     video_session_started_at = models.DateTimeField(
         null=True,
-        blank=True
+        blank=True,
+        
     )
 
     video_session_ended_at = models.DateTimeField(
         null=True,
-        blank=True
+        blank=True,
+        
+    )
+    wallet_processed = models.BooleanField(
+        default=False,
+        db_index=True,
     )
     
     
@@ -280,7 +286,7 @@ class TrainingSession(models.Model):
 
     def __str__(self):
         return (
-            f"{self.client.email} → "
+            f"{self.client.user.email} -> "
             f"{self.trainer.user.email} | "
             f"{self.session_date} "
             f"{self.start_time}-{self.end_time}"

@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from rest_framework import status
 
-from wallet.serializers.admin.admin_settlement_serializer import AdminSettlementSerializer
-from wallet.services.admin.admin_wallet_settlement_service import AdminWalletSettlementService
+from ...serializers.admin.settlement_serializer import AdminSettlementSerializer
+from ...services.admin.admin_wallet_settlement_service import SessionPayoutService
 
 
 class AdminWalletSettlementView(APIView):
@@ -12,14 +12,13 @@ class AdminWalletSettlementView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request):
-
         serializer = AdminSettlementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        settlement_date = serializer.validated_data.get("settlement_date")
+        session_id = serializer.validated_data.get("session_id")
 
-        result = AdminWalletSettlementService.settle_for_date(
-            settlement_date=settlement_date
+        result = SessionPayoutService.settle_session(
+            session_id=session_id
         )
 
         return Response(result, status=status.HTTP_200_OK)
