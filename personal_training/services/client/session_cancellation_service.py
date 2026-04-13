@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class SessionCancellationService:
-
+   
     @staticmethod
     def _get_month_start(target_date: date):
         return target_date.replace(day=1)

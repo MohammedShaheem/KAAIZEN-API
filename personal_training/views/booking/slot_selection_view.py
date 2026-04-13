@@ -30,6 +30,17 @@ class SlotSelectionView(APIView):
                 start_time=start_time,
                 end_time=end_time
             )
+            
+            if not trainers.exists():
+                return Response(
+                    {
+                        "message": "No trainers available for this time. Please choose another slot.",
+                        "no_trainers": True
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            
 
             trainer_data = TrainerProfileSerializer(trainers, many=True).data
             logger.info(f"trainer_data from slot selectionf{trainer_data}")

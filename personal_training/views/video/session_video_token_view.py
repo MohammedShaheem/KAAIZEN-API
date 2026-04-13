@@ -59,8 +59,7 @@ class SessionVideoTokenAPIView(APIView):
             
             is_trainer = trainer_profile == session.trainer
             is_client = client_profile == session.client
-            # is_client = hasattr(user, "clientprofile") and user.clientprofile == session.client
-            # is_trainer = hasattr(user, "trainerprofile") and user.trainerprofile == session.trainer
+            
 
             if not (is_client or is_trainer):
                 logger.warning(
@@ -86,6 +85,7 @@ class SessionVideoTokenAPIView(APIView):
                 user_id=str(user.id),
                 room_id=session.room_id,
                 expiry_seconds=3600,
+                username= username,
             )
 
             response_data = {

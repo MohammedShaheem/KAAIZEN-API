@@ -16,6 +16,9 @@ from personal_training.views.trainer.trainer_sessions_list_view import TrainerSe
 from personal_training.views.trainer.trainer_session_detail_view import TrainerSessionDetailView
 from personal_training.views.video.session_video_token_view import SessionVideoTokenAPIView
 from personal_training.views.client.payment_view import CreateCheckoutSessionView
+from .views.video.start_session_view import StartSessionAPIView
+from .views.video.end_session_view import EndSessionAPIView
+from .views.video.recording_view import RecordingWebhookAPIView
 
 from personal_training.views.stripe.stripe_webhook import stripe_webhook
 
@@ -37,6 +40,9 @@ urlpatterns = [
     path("sessions/<int:session_id>/video-token/",SessionVideoTokenAPIView.as_view()),
     path("payments/checkout/",CreateCheckoutSessionView.as_view()),
     path("stripe/webhook/", stripe_webhook),
+    path("sessions/<int:session_id>/start/",StartSessionAPIView.as_view(),name="start-session"),
+    path("sessions/<int:session_id>/end/",EndSessionAPIView.as_view(),name="end-session"),
+    path("sessions/recording-webhook/",RecordingWebhookAPIView.as_view(),name="recording-webhook"),
     
 
 ]

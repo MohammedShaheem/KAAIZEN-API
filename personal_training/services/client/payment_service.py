@@ -15,7 +15,7 @@ class PaymentService:
 
     @staticmethod
     def create_checkout_session(client, plan: TrainingPlan):
-        print("enetring createcheckout session service")
+        
         if not plan.stripe_price_id:
             raise ValidationError("Stripe price not configured for this plan.")
 
@@ -33,7 +33,7 @@ class PaymentService:
             success_url=f"{settings.FRONTEND_URL}/payment-success",
             cancel_url=f"{settings.FRONTEND_URL}/payment-cancel",
         )
-        print("session created from payment service",session)
+        
 
         return session
 
@@ -43,6 +43,7 @@ class PaymentService:
         
         
         session_id = session["id"]
+        print("Session: ",session_id)
         
         if ClientPlan.objects.filter(
             stripe_checkout_session_id=session_id
@@ -53,12 +54,15 @@ class PaymentService:
 
         client_id = metadata.get("client_id")
         plan_id = metadata.get("plan_id")
+        print("clientid:",client_id)
+        print("planid:",plan_id)
 
         if not client_id or not plan_id:
             raise ValidationError("Invalid metadata in Stripe session.")
         
         
         client = ClientProfile.objects.get(id=client_id)
+        print("client: ",client)
         plan = TrainingPlan.objects.get(id=plan_id)
 
         amount_total = session.get("amount_total")
@@ -75,7 +79,7 @@ class PaymentService:
         )
 
         
-        # deactivating old plans
+        
         ClientPlan.objects.filter(
             client=client,
             is_active=True
@@ -94,5 +98,5 @@ class PaymentService:
             end_date=None,
             is_active=False,  
         )
-        print("cleint plan handle sucessfull payment",client_plan)
+       
         return client_plan

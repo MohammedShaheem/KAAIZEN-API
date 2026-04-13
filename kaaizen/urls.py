@@ -30,8 +30,8 @@ urlpatterns = [
     path("api/trainers/", include("trainers.urls")),
     path("api/personaltraining/", include("personal_training.urls")),
     path("api/ai/", include("ai_plan.urls")),
-    path("api/wallet/admin",include("wallet.urls.admin")),
+    path("api/admin/wallet/",include("wallet.urls.admin")),
     path("api/notification/",include("notification.urls")),
-    # path("api/wallet/trainer",include("wallet.urls.trainer")),
-    # path("api/wallet/client",include("wallet.urls.client")),
+    path("api/trainer/wallet/",include("wallet.urls.trainer")),
+    path("api/client/wallet/",include("wallet.urls.client")),
 ]

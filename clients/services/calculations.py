@@ -29,10 +29,8 @@ def calculate_age(dob):
 
 def calculate_daily_calories(profile):
     logger.info("from calculate daily calory")
-    print("from calculation:",profile)
-    weight = float(Decimal(profile.get("weight_kg")))
-    logger.info("from calculate daily calory-> weight:",weight)
-    print("from calculation",weight)
+    
+    
 
     try:
         required_attrs = [
@@ -48,10 +46,10 @@ def calculate_daily_calories(profile):
         
         
         try:
-            weight = float(Decimal(profile.get("weight_kg")))
+            weight = float(Decimal(profile.weight_kg))
             logger.info("from calculate daily calory-> weight:",weight)
             print("from calculation",weight)
-            height = float(Decimal(profile.get("height_cm")))
+            height = float(Decimal(profile.height_cm))
         except (InvalidOperation, TypeError, ValueError):
             return None
         logger.debug("from calculate daily calory-> weight:",weight,"height:",height)
@@ -110,11 +108,11 @@ def calculate_daily_calories(profile):
 
 def calculate_water_goal(profile):
     try:
-        if not profile.get("weight_kg"):
+        if not profile.weight_kg:
             return None
 
         try:
-            weight = float(Decimal(profile.get("weight_kg")))
+            weight = float(Decimal(profile.weight_kg))
         except (InvalidOperation, TypeError, ValueError):
             return None
         

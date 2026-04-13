@@ -47,4 +47,4 @@ def send_tracking_reminders():
 
         send_push(reminder.user, title, body)
 
-    logger.info("Celery task completed")
+    logger.info("Celery task completed")    
