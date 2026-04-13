@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework import status
+import logging
+logger = logging.getLogger(__name__)
 
 from ..otp.signup_otp_service import send_signup_otp,store_temp_signup_data
 
@@ -37,5 +39,8 @@ def signup_with_role(email: str, password: str, role: str):
     except (UserAlreadyRegisteredError, UserBlockedError):
         raise
 
+    
+
     except Exception as e:
-        raise SignupError("Signup process failed") from e
+        logger.exception("Signup failed")  
+        raise SignupError(str(e))  
