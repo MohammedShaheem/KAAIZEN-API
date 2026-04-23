@@ -9,9 +9,8 @@ def aggregate_session(redis_client, session_key):
     if not raw:
         raise ValueError("Session expired")
     
-    #decoding the bytes returned from redis
-    data = {k.decode(): v.decode() for k, v in raw.items()}
-
+   
+    data = raw
     videos = []
     for key, value in data.items():
         if key.startswith("video:") and key.endswith(":effective_seconds"):

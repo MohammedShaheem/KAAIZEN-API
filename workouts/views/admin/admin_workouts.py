@@ -72,15 +72,10 @@ class AdminWorkoutListCreateView(APIView):
     
     def post(self, request):
         serializer = AdminWorkoutSerializer(data=request.data)
-        
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.is_valid(raise_exception=True)
-
+        serializer.is_valid(raise_exception=True)  
         workout = serializer.save()
+                
         
-        
-
         return Response(
             AdminWorkoutSerializer(workout).data,
             status=status.HTTP_201_CREATED

@@ -8,6 +8,8 @@ from kaaizen.settings import REDIS_CLIENT
 from workouts.services.calorie_calculator import calculate_calories
 from workouts.models import WorkoutSession, SessionVideo
 from workouts.services.session_aggregator import aggregate_session
+from workouts.models import WorkoutCategory
+from django.utils.timezone import datetime
 
 class StartWorkoutSessionView(APIView):
     permission_classes = [IsAuthenticated]
@@ -32,7 +34,6 @@ class StartWorkoutSessionView(APIView):
     
 class CompleteWorkoutSessionView(APIView):
     permission_classes = [IsAuthenticated]
-
     def post(self, request):
         serializer = CompleteSessionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -42,9 +43,15 @@ class CompleteWorkoutSessionView(APIView):
 
         videos, meta = aggregate_session(REDIS_CLIENT, key)
 
-        start_time = now().fromisoformat(meta["started_at"]) 
+        start_time = datetime.fromisoformat(meta["started_at"])
         # how many time have been passed
         wall_clock = (now() - start_time).total_seconds()
+        
+        category = None
+        category_id = meta.get("category_id")
+        if category_id:
+            category = WorkoutCategory.objects.filter(id=category_id).first()
+            
 
         total_effective, calories = calculate_calories(
             videos,
@@ -57,6 +64,7 @@ class CompleteWorkoutSessionView(APIView):
         session = WorkoutSession.objects.create(
             id=session_id,
             user=request.user,
+            category=category,
             status="completed",
             started_at=start_time,
             completed_at=now(),
