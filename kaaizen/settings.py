@@ -28,6 +28,7 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG",cast=bool)
 
 ALLOWED_HOSTS = [
+    "kaaizen.shaheem.site"
     "localhost",
     "127.0.0.1",
     "13.201.67.122",
@@ -106,7 +107,7 @@ DATABASES = {
         'NAME': config('DB_NAME'),        
         'USER': config('DB_USER'),           
         'PASSWORD': config('DB_PASSWORD'),   
-        'HOST': config('DB_HOST'),          
+        'HOST': 'localhost',          
         'PORT': config('DB_PORT'),               
     }
 }
