@@ -23,9 +23,6 @@ class AIPlanService:
         # creating a gemini api client object, for preparing the connection
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
-        models = client.models.list()
-        for m in models:
-            print(m.name)
         
         age = AIPlanService.calculate_age(client_profile.date_of_birth)
 
@@ -68,8 +65,9 @@ class AIPlanService:
 
         raw_text = response.text.strip()
         
+        raw_text = response.text.strip()
+        logger.error(f"RAW GEMINI RESPONSE: {raw_text}")  
         raw_text = re.sub(r"```json|```", "", raw_text).strip()
-
 
         logger.info(f"response from modal {response.text}")
         
@@ -78,7 +76,8 @@ class AIPlanService:
             parsed_json = json.loads(raw_text)
             return parsed_json
         except Exception as e:
-            raise ValueError("Invalid JSON from Gemini")
+            logger.error(f"JSON parse failed. Raw text was: {raw_text}")
+            raise ValueError(f"Invalid JSON from Gemini: {raw_text[:200]}")
 
     @staticmethod
     def create_or_update_plan(client_profile):
