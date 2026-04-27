@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError as DjangoValidationError  # ← add this
+
 from trainers.models import TrainerLeave
 from trainers.services.trainer_leave_service import TrainerLeaveService
 
@@ -35,9 +37,12 @@ class TrainerLeaveSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         trainer = self.context["request"].user.trainer_profile
 
-        return TrainerLeaveService.create_leave(
-            trainer=trainer,
-            start_date=validated_data["start_date"],
-            end_date=validated_data["end_date"],
-            reason=validated_data.get("reason", "")
-        )
+        try:                                                      
+            return TrainerLeaveService.create_leave(
+                trainer=trainer,
+                start_date=validated_data["start_date"],
+                end_date=validated_data["end_date"],
+                reason=validated_data.get("reason", "")
+            )
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e.messages)

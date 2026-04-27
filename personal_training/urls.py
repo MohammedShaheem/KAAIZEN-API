@@ -19,6 +19,7 @@ from personal_training.views.client.payment_view import CreateCheckoutSessionVie
 from .views.video.start_session_view import StartSessionAPIView
 from .views.video.end_session_view import EndSessionAPIView
 from .views.video.recording_view import RecordingWebhookAPIView
+from .views.client.session_cancellation_view import SessionCancellationView
 
 from personal_training.views.stripe.stripe_webhook import stripe_webhook
 
@@ -39,6 +40,7 @@ urlpatterns = [
     path("trainers/sessions/<int:session_id>/",TrainerSessionDetailView.as_view()),
     path("sessions/<int:session_id>/video-token/",SessionVideoTokenAPIView.as_view()),
     path("payments/checkout/",CreateCheckoutSessionView.as_view()),
+    path("sessions/cancel/", SessionCancellationView.as_view()),
     path("stripe/webhook/", stripe_webhook),
     path("sessions/<int:session_id>/start/",StartSessionAPIView.as_view(),name="start-session"),
     path("sessions/<int:session_id>/end/",EndSessionAPIView.as_view(),name="end-session"),

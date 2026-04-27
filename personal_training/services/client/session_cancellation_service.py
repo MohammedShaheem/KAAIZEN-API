@@ -4,6 +4,11 @@ from django.db import transaction, DatabaseError, IntegrityError
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware
 
+from wallet.models import WalletTransaction,Wallet
+
+from wallet.services.refund.session_refund_service import SessionRefundService
+
+
 from personal_training.models import (
     TrainingSession,
     MonthlyCancellationCounter
@@ -73,16 +78,19 @@ class SessionCancellationService:
                 hours_before = (session_dt - now()).total_seconds() / 3600
                 refund_eligible = hours_before >= REFUND_CUTOFF_HOURS
 
-            session.status = (
-                "canceled_early"
-                if refund_eligible
-                else "canceled_late"
-            )
-            session.save()
+            session.status = "canceled_early" if refund_eligible else "canceled_late"
+            session.save(update_fields=["status"])  
+
+            if refund_eligible:
+                SessionRefundService.process_session_refund(
+                    session, 
+                    reason="client_early_cancel"
+                )
 
             if counter.cancellations_used < MAX_CANCELLATIONS_PER_MONTH:
                 counter.cancellations_used += 1
                 counter.save()
+                 
 
             return {
                 "session": session,

@@ -27,30 +27,29 @@ class ClientProfileView(APIView):
             )
 
         serializer = ClientProfileSerializer(profile)
+        print("data from profile get:",serializer.data)
+        
         return Response(serializer.data)
 
     def post(self, request):
-        logger.info("from post of client rpofile view")
+        logger.info("from post of client profile view")
         if self.get_profile(request.user):
             return Response(
                 {"detail": "Profile already exists"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
         serializer = ClientProfileSerializer(
             data=request.data,
             context={"request": request}
         )
-        serializer.is_valid(raise_exception=False)
-
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
-
         
-
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer.save()
-
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
     def patch(self, request):
         profile = self.get_profile(request.user)

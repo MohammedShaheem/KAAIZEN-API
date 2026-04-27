@@ -7,12 +7,15 @@ from clients.permissions import IsClient
 from personal_training.serializers.client.session_cancellation import (
     SessionCancellationSerializer
 )
+from clients.models import ClientProfile
 from personal_training.services.client.session_cancellation_service import (
     SessionCancellationService
 )
+import logging
 
-
+logger = logging.getLogger(__name__)
 class SessionCancellationView(APIView):
+    
     permission_classes = [IsClient]
 
     def post(self, request):
@@ -21,7 +24,13 @@ class SessionCancellationView(APIView):
         try:
             serializer.is_valid(raise_exception=True)
 
-            client = request.user
+            try:
+                client = request.user.client_profile
+            except ClientProfile.DoesNotExist:
+                return Response(
+                    {"detail": "Client profile not found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
             session_id = serializer.validated_data["session_id"]
 
             result = SessionCancellationService.cancel_session(
@@ -48,8 +57,9 @@ class SessionCancellationView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        except Exception:
-            return Response(
-                {"detail": "Something went wrong while canceling session."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        except Exception as e:
+            logger.exception("Session cancellation failed")  
+        return Response(
+            {"detail": "Something went wrong while canceling session."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
