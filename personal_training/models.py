@@ -207,8 +207,8 @@ class TrainingSession(models.Model):
         blank=True,null=True
     )
 
-    scheduled_start = models.DateTimeField(db_index=True,null=True, blank=True)
-    scheduled_end = models.DateTimeField(db_index=True,null=True, blank=True)
+    trainer_joined_at = models.DateTimeField(db_index=True,null=True, blank=True)
+    client_joined_at = models.DateTimeField(db_index=True,null=True, blank=True)
     
     
     room_id = models.CharField(
@@ -255,7 +255,6 @@ class TrainingSession(models.Model):
 
     class Meta:
         db_table = "training_sessions"
-        ordering = ["-scheduled_start"]
         indexes = [
             models.Index(fields=["trainer", "session_date"]),
             models.Index(fields=["client", "session_date"]),

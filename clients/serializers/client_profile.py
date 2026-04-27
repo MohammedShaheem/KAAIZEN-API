@@ -2,7 +2,8 @@ from rest_framework import serializers
 from clients.models import ClientProfile
 from clients.services.calculations import (
     calculate_daily_calories,
-    calculate_water_goal
+    calculate_water_goal,
+    calculate_daily_calorie_burn_goal
 )
 from ..models import MealAllocation
 import logging
@@ -18,6 +19,7 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "target_daily_calories",
             "water_goal_ml",
+            "daily_calorie_burn_goal",
             "created_at",
             "updated_at"
         )
@@ -25,13 +27,17 @@ class ClientProfileSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         logger.info("from create of client profile serializer")
+        
 
         user = self.context["request"].user
         
         validated_data["user"] = user
         validated_data["target_daily_calories"] =  calculate_daily_calories(validated_data)
+        
         validated_data["water_goal_ml"] = calculate_water_goal(validated_data)
-
+        validated_data["daily_calorie_burn_goal"] = calculate_daily_calorie_burn_goal(validated_data)
+        print("entering to the serializer create", flush=True)
+        print("water goal from serializer", validated_data["water_goal_ml"], flush=True)
         profile = super().create(validated_data)
         
         # creating the time based targets for meal entry
@@ -40,12 +46,25 @@ class ClientProfileSerializer(serializers.ModelSerializer):
 
     
     
-    # here instance is the already created profile
-    def update(self,instance,validated_data):
-        instance.target_daily_calories = calculate_daily_calories(instance)
-        instance.water_goal_ml = calculate_water_goal(instance)
+    # here instance is the already created profile for giving the updated values to the calculations.
+    def update(self, instance, validated_data):
+        profile_dict = {
+            "weight_kg":            validated_data.get("weight_kg", instance.weight_kg),
+            "height_cm":            validated_data.get("height_cm", instance.height_cm),
+            "gender":               validated_data.get("gender", instance.gender),
+            "date_of_birth":        validated_data.get("date_of_birth", instance.date_of_birth),
+            "daily_activity_level": validated_data.get("daily_activity_level", instance.daily_activity_level),
+            "fitness_goal":         validated_data.get("fitness_goal", instance.fitness_goal),
+        }
+
+        validated_data["target_daily_calories"] = calculate_daily_calories(profile_dict)
+        validated_data["water_goal_ml"] = calculate_water_goal(profile_dict)
+        validated_data["daily_calorie_burn_goal"] = calculate_daily_calorie_burn_goal(profile_dict)  
+
+        
+        instance = super().update(instance, validated_data)
         self._initialize_meal_allocations(instance, update=True)
-        return super().update(instance, validated_data) 
+        return instance
     
     
     

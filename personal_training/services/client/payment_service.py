@@ -41,10 +41,7 @@ class PaymentService:
     @transaction.atomic
     def handle_successful_payment(session):
         
-        
-        session_id = session["id"]
-        print("Session: ",session_id)
-        
+        session_id = session["id"]        
         if ClientPlan.objects.filter(
             stripe_checkout_session_id=session_id
             ).exists():
@@ -54,15 +51,13 @@ class PaymentService:
 
         client_id = metadata.get("client_id")
         plan_id = metadata.get("plan_id")
-        print("clientid:",client_id)
-        print("planid:",plan_id)
+        
 
         if not client_id or not plan_id:
             raise ValidationError("Invalid metadata in Stripe session.")
         
         
         client = ClientProfile.objects.get(id=client_id)
-        print("client: ",client)
         plan = TrainingPlan.objects.get(id=plan_id)
 
         amount_total = session.get("amount_total")

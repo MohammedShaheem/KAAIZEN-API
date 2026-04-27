@@ -2,6 +2,7 @@ from django.urls import path
 from ..views.client.sessions import StartWorkoutSessionView,CompleteWorkoutSessionView
 from ..views.client.heartbeats import WorkoutHeartbeatView
 from ..views.client.public_workouts import ClientWorkoutCategoryListView,ClientWorkoutListByCategoryView,ClientWorkoutDetailView
+from workouts.views.client.recent_workout import RecentWorkoutSessionsView
 
 urlpatterns = [
     path("sessions/start/", StartWorkoutSessionView.as_view()),
@@ -10,4 +11,5 @@ urlpatterns = [
     path("categories/", ClientWorkoutCategoryListView.as_view()),
     path("categories/<int:category_id>/workouts/", ClientWorkoutListByCategoryView.as_view()),
     path("workouts/<int:pk>/", ClientWorkoutDetailView.as_view()),
+    path('sessions/recent/', RecentWorkoutSessionsView.as_view()),
 ]

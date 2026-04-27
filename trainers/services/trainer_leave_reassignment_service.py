@@ -2,11 +2,13 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import datetime
+from django.db.models import Exists,OuterRef
 
 from trainers.models import TrainerProfile, TrainerLeave
 from personal_training.models import TrainingSession
 from personal_training.choices import TrainingSessionStatus
 from trainers.choices import Status
+from wallet.services.refund.session_refund_service import SessionRefundService,RefundServiceError
 
 import logging
 logger = logging.getLogger(__name__)
@@ -19,30 +21,35 @@ class TrainerReassignmentService:
         return timezone.make_aware(
             datetime.combine(session.session_date, session.start_time)
         )
-
+    #using corelated subquery for checking the available trainers(outerref,exists)
+    #fetch all trainers annotate each with has conflict
+    #filtering only those who dont have conflict
+    
     @staticmethod
     def _find_replacement_trainer(session, excluded_trainer):
         required_skills = excluded_trainer.skills
-        #finding trainers with same skills
-        candidates = TrainerProfile.objects.filter(
+
+        conflict_subquery = TrainingSession.objects.filter(
+            trainer_id=OuterRef('pk'),          
+            session_date=session.session_date,
+            start_time__lt=session.end_time,
+            end_time__gt=session.start_time,
+            status=TrainingSessionStatus.SCHEDULED,
+        )
+
+        replacement = TrainerProfile.objects.filter(
             is_active=True,
             is_verified=True,
             skills__contains=required_skills,
-        ).exclude(id=excluded_trainer.id)
-        #finding any session time conflict with the trainers founded
-        for trainer in candidates:
-            conflict = TrainingSession.objects.filter(
-                trainer=trainer,
-                session_date=session.session_date,
-                start_time__lt=session.end_time,
-                end_time__gt=session.start_time,
-                status=TrainingSessionStatus.SCHEDULED,
-            ).exists()
+        ).exclude(
+            id=excluded_trainer.id
+        ).annotate(
+            has_conflict=Exists(conflict_subquery)   
+        ).filter(
+            has_conflict=False                        
+        ).first()                                    
 
-            if not conflict:
-                return trainer
-
-        return None
+        return replacement  
 
     @staticmethod
     @transaction.atomic
@@ -64,7 +71,7 @@ class TrainerReassignmentService:
                 session=session,
                 excluded_trainer=leave.trainer,
             )
-            #if replacement found replacing otherwise cancelling session    ``
+            #if replacement found replacing otherwise cancelling session
             if replacement:
                 session.trainer = replacement
                 session.status = TrainingSessionStatus.REASSIGNED
@@ -72,7 +79,15 @@ class TrainerReassignmentService:
             else:
                 session.status = TrainingSessionStatus.CANCELLED_BY_SYSTEM
                 session.save(update_fields=["status"])
-                # RefundService.create_credit_from_session(session)
+                try:
+                    SessionRefundService.process_session_refund(session,"system_no_trainer")
+                    
+                except RefundServiceError as e:
+                    
+                    logger.error(
+                        "Refund failed for session %s: %s",
+                        session.id, str(e)
+                    )
 
         logger.info(
             "Processed reassignment for leave %s (trainer=%s)",

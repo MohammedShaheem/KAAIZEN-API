@@ -18,10 +18,8 @@ class WorkoutHeartbeatView(APIView):
         raw = REDIS_CLIENT.hgetall(key)
         if not raw:
             return Response({"detail": "Session expired"}, status=400)
-        
-        print("type from heartbeat view",type(next(iter(raw.keys()))))
 
-        data = {k:v for k, v in raw.items()}
+        data = raw  
         if data["user_id"] != str(request.user.id):
             return Response(status=403)
 

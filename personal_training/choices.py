@@ -10,6 +10,7 @@ class TrainingSessionStatus(TextChoices):
     CANCELED_LATE = "canceled_late", "Canceled Late"
     NO_SHOW = "no_show", "No Show"
     TRAINER_UNAVAILABLE = "trainer_unavailable", "Trainer Unavailable"
+    CANCELLED_BY_SYSTEM = "cancelled_by_system", "Cancelled_by_system"
 
 
 class PlanStatusChoice(TextChoices):

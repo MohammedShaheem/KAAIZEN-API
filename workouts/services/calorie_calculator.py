@@ -1,5 +1,5 @@
+
 def calculate_calories(videos, user_weight_kg):
-   
     total_seconds = 0
     weighted_met_sum = 0.0
 
@@ -13,5 +13,5 @@ def calculate_calories(videos, user_weight_kg):
     avg_met = weighted_met_sum / total_seconds
     hours = total_seconds / 3600
 
-    calories = round(avg_met * user_weight_kg * hours)
+    calories = round(avg_met * float(user_weight_kg) * hours)  
     return total_seconds, calories

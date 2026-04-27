@@ -17,7 +17,7 @@ signature verification with the webhook secret key stored in the settings.
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
-    print("the webhook request reached",sig_header)
+    
 
     try:
         event = stripe.Webhook.construct_event(
@@ -33,7 +33,7 @@ def stripe_webhook(request):
     if event_type == "checkout.session.completed":
         
         session = event["data"]["object"]
-        print("the session is correct", session)
+       
         if session:
             PaymentService.handle_successful_payment(session)
 

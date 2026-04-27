@@ -28,15 +28,9 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG",cast=bool)
 
 ALLOWED_HOSTS = [
-    "kaaizen.shaheem.site",
-    "13.201.67.122",
     "localhost",
     "127.0.0.1",
-]
-
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://kaaizen.shaheem.site",
+    "13.201.67.122",
 ]
 
 
@@ -116,6 +110,7 @@ DATABASES = {
         'PORT': config('DB_PORT'),               
     }
 }
+# 'localhost'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

@@ -130,7 +130,7 @@ class TrainerLeaveService:
             leave_status=Status.PLANNED,
             created_by=trainer.user,
         )
-        #reassignment only works after commit, on_commit only takes a funtion.
+        #reassignment only works after commit, on_commit only takes a funtion with 0 arguments
             transaction.on_commit(
             lambda: TrainerReassignmentService.process_leave_reassignment(leave)
         )

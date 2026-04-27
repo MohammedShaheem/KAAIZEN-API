@@ -54,6 +54,7 @@ class ClientProfile(UUIDModel, TimeStampedModel):
     
     target_daily_calories = models.PositiveIntegerField(null=True,blank=True)
     water_goal_ml=models.PositiveIntegerField(null=True,blank=True)
+    daily_calorie_burn_goal = models.PositiveIntegerField(null=True, blank=True) 
     
     class Meta:
         db_table = "client_profiles"

@@ -18,7 +18,7 @@ class CreateCheckoutSessionView(APIView):
     permission_classes = [IsClient]
 
     def post(self, request):
-        print("entering here create shceckout session view")
+    
         serializer = CreateCheckoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
