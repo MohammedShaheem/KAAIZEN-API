@@ -251,6 +251,12 @@ class TrainingSession(models.Model):
     created_by_system = models.BooleanField(default=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancelled_by_trainer = models.BooleanField(default=False)
+    client_rating = models.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )      
 
 
     class Meta:

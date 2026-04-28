@@ -22,6 +22,7 @@ from .views.video.recording_view import RecordingWebhookAPIView
 from .views.client.session_cancellation_view import SessionCancellationView
 
 from personal_training.views.stripe.stripe_webhook import stripe_webhook
+from personal_training.views.client.session_rating import RateSessionView
 
 urlpatterns = [
     path("plan/",ClientPlanView.as_view()),
@@ -45,6 +46,7 @@ urlpatterns = [
     path("sessions/<int:session_id>/start/",StartSessionAPIView.as_view(),name="start-session"),
     path("sessions/<int:session_id>/end/",EndSessionAPIView.as_view(),name="end-session"),
     path("sessions/recording-webhook/",RecordingWebhookAPIView.as_view(),name="recording-webhook"),
+    path("sessions/rate/", RateSessionView.as_view(), name="rate-session"),
     
 
 ]
