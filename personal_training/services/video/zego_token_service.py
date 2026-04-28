@@ -38,6 +38,7 @@ class ZegoTokenService:
                 user_id=user_id,
                 server_secret=settings.ZEGO_SERVER_SECRET,
                 effective_time=expiry,
+                room_id=room_id,  
             )
 
             return {
