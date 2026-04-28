@@ -1,6 +1,8 @@
 import base64, json, os, random, struct, time
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
+import logging
+logger = logging.getLogger(__name__)
 
 
 def generate_zego_token04(
@@ -17,7 +19,7 @@ def generate_zego_token04(
     privilege_payload = json.dumps({
         "room_id": room_id,
         "privilege": {"1": 1, "2": 1},
-        "stream_id_list": None,
+        "stream_id_list": []
     }, separators=(",", ":"))
 
     body = json.dumps({
@@ -29,8 +31,8 @@ def generate_zego_token04(
         "payload": privilege_payload,
     }, separators=(",", ":"))
 
-    key = bytes.fromhex(server_secret)
-    iv = os.urandom(16)         
+    key = server_secret.encode("utf-8")
+    iv = bytes(16)     
 
     cipher = AES.new(key, AES.MODE_CBC, iv)
     ciphertext = cipher.encrypt(pad(body.encode("utf-8"), AES.block_size))
@@ -39,5 +41,7 @@ def generate_zego_token04(
     buf += struct.pack(">I", expire)
     buf += struct.pack(">H", len(iv)) + iv
     buf += struct.pack(">H", len(ciphertext)) + ciphertext
-
+    
+    print(f"Generated Zego token for user:{user_id} room:{room_id}")
+    
     return "04" + base64.b64encode(buf).decode("utf-8")
