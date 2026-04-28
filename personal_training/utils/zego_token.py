@@ -1,4 +1,4 @@
-import base64, json, random, struct, time
+import base64, json, os, random, struct, time
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 
@@ -16,10 +16,7 @@ def generate_zego_token04(
 
     privilege_payload = json.dumps({
         "room_id": room_id,
-        "privilege": {
-            "1": 1,  # login room
-            "2": 1,  # publish stream
-        },
+        "privilege": {"1": 1, "2": 1},
         "stream_id_list": None,
     }, separators=(",", ":"))
 
@@ -29,11 +26,11 @@ def generate_zego_token04(
         "nonce": nonce,
         "ctime": now,
         "expire": expire,
-        "payload": privilege_payload,  
+        "payload": privilege_payload,
     }, separators=(",", ":"))
 
     key = bytes.fromhex(server_secret)
-    iv  = struct.pack(">II", now, expire) + b"\x00" * 8
+    iv = os.urandom(16)         
 
     cipher = AES.new(key, AES.MODE_CBC, iv)
     ciphertext = cipher.encrypt(pad(body.encode("utf-8"), AES.block_size))
