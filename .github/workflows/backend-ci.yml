@@ -26,7 +26,7 @@ jobs:
     # ── BACKEND ──────────────────────────────
     - name: Build Backend Image
       run: |
-        docker build -t kaaizen-backend ./backend
+        docker build -t kaaizen-backend .
         docker tag kaaizen-backend:latest \
           ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/kaaizen-backend:latest
 
