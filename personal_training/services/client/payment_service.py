@@ -12,9 +12,14 @@ from personal_training.utils.calculate_pricing import calculate_pricing
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class PaymentService:
-
+    
+    
+    """this will make a request to the stripe's server and so that the stripe will create 
+        checkout session -> secure payment page hosted entirely by stripe.
+        creates the session object
+        """
     @staticmethod
-    def create_checkout_session(client, plan: TrainingPlan):
+    def create_checkout_session(client, plan):
         
         if not plan.stripe_price_id:
             raise ValidationError("Stripe price not configured for this plan.")
