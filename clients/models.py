@@ -52,6 +52,12 @@ class ClientProfile(UUIDModel, TimeStampedModel):
                                             choices=DailyActivityLevel.choices,
                                             null=True,blank=True)
     
+    profile_picture = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True
+    )
+    
     target_daily_calories = models.PositiveIntegerField(null=True,blank=True)
     water_goal_ml=models.PositiveIntegerField(null=True,blank=True)
     daily_calorie_burn_goal = models.PositiveIntegerField(null=True, blank=True) 

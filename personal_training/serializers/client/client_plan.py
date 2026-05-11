@@ -23,6 +23,7 @@ class ClientPlanSerializer(serializers.ModelSerializer):
         model = ClientPlan
         fields = [
             "id",
+            "status",
             "start_date",
             "end_date",
             "sessions_per_week",

@@ -31,7 +31,7 @@ ALLOWED_HOSTS = [
     "kaaizen.shaheem.site",
     "localhost",
     "127.0.0.1",
-    "13.201.67.122",
+    "3.108.223.244",
 ]
 
 
@@ -107,7 +107,7 @@ DATABASES = {
         'NAME': config('DB_NAME'),        
         'USER': config('DB_USER'),           
         'PASSWORD': config('DB_PASSWORD'),   
-        'HOST': config("DB_HOST"),          
+        'HOST': config('DB_HOST'),          
         'PORT': config('DB_PORT'),               
     }
 }
