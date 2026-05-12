@@ -1,4 +1,4 @@
-name: Build and Deploy Kaaizen
+name: Build and Deploy Backend
 
 on:
   push:
@@ -23,7 +23,6 @@ jobs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
 
-    # ── BACKEND ──────────────────────────────
     - name: Build Backend Image
       run: |
         docker build -t kaaizen-backend .
@@ -35,21 +34,6 @@ jobs:
         docker push \
           ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/kaaizen-backend:latest
 
-    # ── FRONTEND ─────────────────────────────
-    - name: Build Frontend Image
-      run: |
-        docker build \
-          --build-arg VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }} \
-          -t kaaizen-frontend ./Frontend/kaaizen
-        docker tag kaaizen-frontend:latest \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/kaaizen-frontend:latest
-
-    - name: Push Frontend Image
-      run: |
-        docker push \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/kaaizen-frontend:latest
-
-    # ── DEPLOY TO EC2 ─────────────────────────
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v1
       with:
@@ -58,19 +42,10 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd ~/kaaizen
-
-          # Login to ECR
           aws ecr get-login-password --region ap-south-1 | \
             docker login --username AWS --password-stdin \
             444896210700.dkr.ecr.ap-south-1.amazonaws.com
-
-          # Pull latest images
           docker pull 444896210700.dkr.ecr.ap-south-1.amazonaws.com/kaaizen-backend:latest
-          docker pull 444896210700.dkr.ecr.ap-south-1.amazonaws.com/kaaizen-frontend:latest
-
-          # Restart all containers
           docker compose down
           docker compose up -d
-
-          # Clean up old images
           docker image prune -f
