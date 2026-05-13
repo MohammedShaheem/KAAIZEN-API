@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-
+from django.conf import settings
 from personal_training.models import TrainingSession
 from personal_training.services.video.zego_token_service import ZegoTokenService
 from personal_training.tasks import check_session_no_show
@@ -95,20 +95,11 @@ class SessionVideoTokenAPIView(APIView):
                 else trainer_profile.full_name
             )
 
-            token_data = ZegoTokenService.generate(
-                user_id=str(user.id),
-                room_id=session.room_id,
-                expiry_seconds=3600,
-                username=username,
-            )
-
             return Response({
-                "app_id":     token_data["appID"],
-                "token":      token_data["token"],
-                "user_id":    token_data["userID"],
-                "room_id":    token_data["roomID"],
-                "expires_at": token_data["expiresAt"],
-                "user_name":  username,
+                "app_id":    settings.ZEGO_APP_ID,
+                "room_id":   session.room_id,
+                "user_id":   str(user.id),
+                "user_name": username,
             }, status=status.HTTP_200_OK)
 
         except Http404:
