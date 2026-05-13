@@ -29,6 +29,8 @@ def handle_google_auth(id_token: str):
 
     google_id = payload.get("sub")
     email = payload.get("email")
+    full_name = payload.get("name", "")  
+    picture = payload.get("picture", "")
 
     if not google_id or not email:
         raise GoogleAuthError("Google payload incomplete")
@@ -62,7 +64,8 @@ def handle_google_auth(id_token: str):
 
             refresh = RefreshToken.for_user(user)
 
-            return user, refresh, has_profile
+            return user, refresh, has_profile, full_name, picture   
+
 
     except Exception as e:
         print("GOOGLE AUTH ERROR:", str(e))   

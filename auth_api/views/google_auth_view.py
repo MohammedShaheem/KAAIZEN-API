@@ -15,7 +15,8 @@ class GoogleAuthView(APIView):
         try:
             token = request.data.get("id_token")
 
-            user, refresh, has_profile = handle_google_auth(token)
+            user, refresh, has_profile, full_name, picture = handle_google_auth(token)  
+
 
             response = Response(
                 {
@@ -23,6 +24,8 @@ class GoogleAuthView(APIView):
                         "email": user.email,
                         "role": user.role,
                         "has_profile": has_profile,
+                        "full_name": full_name,
+                        "profile_picture": picture, 
                     }
                 },
                 status=status.HTTP_200_OK
