@@ -36,8 +36,7 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         
         validated_data["water_goal_ml"] = calculate_water_goal(validated_data)
         validated_data["daily_calorie_burn_goal"] = calculate_daily_calorie_burn_goal(validated_data)
-        print("entering to the serializer create", flush=True)
-        print("water goal from serializer", validated_data["water_goal_ml"], flush=True)
+        
         profile = super().create(validated_data)
         
         # creating the time based targets for meal entry

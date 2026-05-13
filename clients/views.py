@@ -27,7 +27,7 @@ class ClientProfileView(APIView):
             )
 
         serializer = ClientProfileSerializer(profile)
-        print("data from profile get:",serializer.data)
+        
         
         return Response(serializer.data)
 
